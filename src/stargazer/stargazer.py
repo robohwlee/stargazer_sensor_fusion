@@ -28,7 +28,7 @@ RESULT = '^'
 NOTIFY = '*'
 
 class StarGazer(object):
-    def __init__(self, device, marker_map, callback_global=None, callback_local=None):
+    def __init__(self, device, marker_map, callback_global=None, callback_local=None,callback_raw=None, callback_raw_reponse=None):
         """
         Connect to a Hagisonic StarGazer device and receive poses.
 
@@ -55,6 +55,8 @@ class StarGazer(object):
 
         self._callback_global =  callback_global
         self._callback_local  =  callback_local
+        self._callback_raw  =  callback_raw
+        self._callback_raw_reponse = callback_raw_reponse
 
         self._stopped = Event()
         self._thread = None
@@ -78,8 +80,13 @@ class StarGazer(object):
         """
         Connect to the StarGazer over the specified RS-232 port.
         """
-        assert not self.is_connected
+        if self.is_connected:
+            self.disconnect()
+
         self.connection = Serial(port=self.device, baudrate=115200, timeout=1.0)
+        if self.connection is None:
+            return False
+        return True
 
     def disconnect(self):
         """
@@ -88,6 +95,10 @@ class StarGazer(object):
         if self.is_connected:
             self.connection.close()
             self.connection = None
+
+        if self.connection is None:
+            return True
+        return False
 
     @property
     def is_streaming(self):
@@ -101,8 +112,10 @@ class StarGazer(object):
         Begin streaming pose data from the StarGazer.
         """
         assert self.is_connected and not self.is_streaming
-        self._send_command('CalcStart')
-        self._thread = Thread(target=self._read, args=()).start()
+        success = self._send_command('CalcStart')
+        if success:
+            self._thread = Thread(target=self._read, args=()).start()
+        return success
 
     def stop_streaming(self):
         """
@@ -112,7 +125,8 @@ class StarGazer(object):
         if self.is_streaming:
             self._stopped.set()
             self._thread.join()
-        self._send_command('CalcStop')
+        success = self._send_command('CalcStop')
+        return success
 
     def set_parameter(self, name, value):
         """
@@ -131,7 +145,11 @@ class StarGazer(object):
             set_parameter('MarkType', 'HLD1L')
         """
         assert self.is_connected and not self.is_streaming
-        self._send_command(name, value)
+        success = self._send_command(name, value)
+        return success
+
+    def get_parameter(self, name):
+        pass
 
     def _send_command(self, *args):
         """
@@ -147,7 +165,12 @@ class StarGazer(object):
             _send_command('CalcStop')
             _send_command('MarkType', 'HLD1L')
         """
+        success = True
         delimited   = DELIM.join(str(i) for i in args)
+
+        if 'SetEnd' in delimited:
+            delimited = 'SetEnd'
+
         command_str = STX + CMD + delimited + ETX
         rospy.loginfo('Sending command to StarGazer: %s', command_str)
 
@@ -156,20 +179,49 @@ class StarGazer(object):
             self.connection.write(ch)
             time.sleep(0.05)
 
-        # Wait for a response.
         response_expected = STX + RESPONSE + delimited + ETX
-        response_actual = self.connection.read(len(response_expected))
+
+        success = self._read_response(response_expected)
+
+        if success and ('SetEnd' in response_expected):
+            response_expected = STX + RESPONSE + 'ParameterUpdate' + ETX
+            time.sleep(1.0)
+            success = self._read_response(response_expected)
+            if(success):
+                rospy.loginfo('Parameters update successful')
+        
+        return success
+
+    def _read_response(self, response_expected):
+        success = True
+
+        try:
+            response_actual = self.connection.read(len(response_expected))
+        except Exception as e:
+               rospy.logwarn(str(e))
+               sucess = False
+               return success
         
         # Scan for more incoming characters until we get a read timeout.
         # (This is useful if there is still some incoming data from previous
         # commands in intermediate serial buffers.)
         while response_actual[-len(response_expected):] != response_expected:
-            c = self.connection.read()
+            c = None
+            try:
+                c = self.connection.read()
+            except Exception as e:
+               rospy.logwarn(str(e))
+               return success
 
             if c:
                 # Add new characters to the response string.
                 response_actual += c
             else:
+                rospy.logwarn('Received invalid response {%s} expected "{%s}'% \
+                              (response_actual, response_expected))
+                success = False
+                break
+                '''
                 # If we run out of characters and still don't match, report
                 # the invalid response as an exception.
                 raise Exception(
@@ -177,6 +229,12 @@ class StarGazer(object):
                     'expected "{:s}".'
                     .format(command_str, response_actual, response_expected)
                 )
+                '''
+
+        if self._callback_raw_reponse:
+                self._callback_raw_reponse(response_actual)
+
+        return success
 
     def _read(self):
         """
@@ -222,20 +280,26 @@ class StarGazer(object):
 
             if message.group('type') == RESULT:
                 markers = tag_matcher.finditer(message.group('payload'))
-
                 local_poses = {}
+                raw_poses = []
                 for marker in markers:
                     # Parse pose information for this marker.
                     _id = marker.group('id')
-                    yaw = -np.radians(float(marker.group('yaw')))
+                    yaw = np.radians(float(marker.group('yaw')))
                     x = 0.01 * float(marker.group('x'))
                     y = 0.01 * float(marker.group('y'))
                     # Note: this axis is negated.
-                    z = -0.01 * float(marker.group('z'))
+                    z = 0.0#-0.01 * float(marker.group('z'))
+
+                    raw_pose = [_id,x,y,0,-yaw]
+                    raw_poses.append(raw_pose)
 
                     # Convert the pose to a transform and store it by ID.
                     marker_to_stargazer = fourdof_to_matrix((x, y, z), yaw)
                     local_poses[_id] = np.linalg.inv(marker_to_stargazer)
+
+                if self._callback_raw:
+                    self._callback_raw(raw_poses)
 
                 if self._callback_local:
                     self._callback_local(local_poses)
@@ -262,7 +326,7 @@ class StarGazer(object):
                 message_buffer += self.connection.read(self._chunk_size)
                 message_buffer  = process_buffer(message_buffer)
             except Exception as e:
-                rospy.logerr('Error processing current buffer: %s (content: "%s")', 
+                rospy.logwarn('Error processing current buffer: %s (content: "%s")', 
                     str(e), message_buffer
                 )
                 message_buffer  = ''
