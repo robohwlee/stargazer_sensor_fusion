@@ -3,10 +3,13 @@ import rospy
 import numpy
 import tf
 from stargazer import StarGazer
+from std_msgs.msg import String
 from geometry_msgs.msg import (Point, Quaternion, Pose, PoseArray,
                                Transform, TransformStamped,
                                PoseWithCovariance, PoseWithCovarianceStamped)
 from tf2_msgs.msg import TFMessage
+from stargazer.msg import (MarkerPose, MarkerPoses,
+                           MarkerRawPose, MarkerRawPoses)
 
 
 def tf_to_matrix(trans, rot):
@@ -37,17 +40,26 @@ class StarGazerNode(object):
     def __init__(self):
         self.tf_broadcaster = tf.TransformBroadcaster()
         self.tf_listener = tf.TransformListener()
-        self.pose_pub = rospy.Publisher('robot_pose', PoseWithCovarianceStamped)
-        self.pose_array_pub = rospy.Publisher('robot_pose_array', PoseArray)
+        self.pose_pub = rospy.Publisher('robot_pose', PoseWithCovarianceStamped, queue_size=1)
+        self.pose_array_pub = rospy.Publisher('robot_pose_array', PoseArray, queue_size=1)
+        self.marker_poses_raw_pub = rospy.Publisher('marker_raw_poses', MarkerRawPoses, queue_size=1)
+        self.marker_poses_pub = rospy.Publisher('marker_poses', MarkerPoses, queue_size=1)
+        self.eventin_sub = rospy.Subscriber("~event_in", String, self.callback_set_param)
+        self.eventout_pub = rospy.Publisher("~event_out", String, queue_size=1)
+        self.rawresponse_pub = rospy.Publisher("~raw_response", String, queue_size=1)
         self.unknown_ids = set()
 
     def run(self):
-        marker_map = rospy.get_param('~marker_map', {})
-        args = {
-            'device': rospy.get_param('~device'),
+        marker_map_temp = {}
+        #marker_map_temp['2916'] = [[1,0,0,0.032],[0,1,0,0.043],[0,0,1,1.84],[0,0,0,1]]
+        marker_map = rospy.get_param('~marker_map', marker_map_temp)
+        self.args = {
+            'device': rospy.get_param('~device_port', ''),
             'marker_map': marker_map,
             'callback_global': self.callback_global,
             'callback_local': self.callback_local,
+            'callback_raw': self.callback_raw,
+            'callback_raw_reponse': self.callback_raw_reponse,
         }
         parameters = self.get_options()
 
@@ -56,8 +68,8 @@ class StarGazerNode(object):
         self.stargazer_frame_id = rospy.get_param('~stargazer_frame_id', 'stargazer')
         self.map_frame_prefix = rospy.get_param('~map_frame_prefix', 'stargazer/map_')
         self.marker_frame_prefix = rospy.get_param('~marker_frame_prefix', 'stargazer/marker_')
-
-        self.covariance = rospy.get_param('~covariance', None)
+        cov = [0.01]*36
+        self.covariance = rospy.get_param('~covariance', cov)
         if self.covariance is None:
             raise Exception('The "covariance" parameter is required.')
         elif len(self.covariance) != 36:
@@ -75,26 +87,114 @@ class StarGazerNode(object):
             marker_tf_msg.transform = matrix_to_transform(Tmap_marker)
             map_tf_msg.transforms.append(marker_tf_msg)
 
-        self.tf_static_pub = rospy.Publisher('tf_static', TFMessage, latch=True)
+        self.tf_static_pub = rospy.Publisher('tf_static', TFMessage, latch=True, queue_size=1)
         self.tf_static_pub.publish(map_tf_msg)
         
         # Start publishing Stargazer data.
-        with StarGazer(**args) as stargazer:
+        
+        with StarGazer(**self.args) as self.stargazer:
+            '''
             # The StarGazer might be streaming data. Turn off streaming mode.
-            stargazer.stop_streaming()
+            self.stargazer.stop_streaming()
 
             # Set all parameters, possibly to their default values. This is the
             # safest option because the parameters can be corrupted when the
             # StarGazer is powered off.
             for name, value in parameters.iteritems():
-                stargazer.set_parameter(name, value)
+                self.stargazer.set_parameter(name, value)
 
             # Start streaming. ROS messages will be published in callbacks.
-            stargazer.start_streaming()
+            self.stargazer.start_streaming()
+            '''
+            rospy.loginfo('Stargazer Publisher node is running..')
+            self.stargazer.stop_streaming()
             rospy.spin()
 
             # Stop streaming. Try to clean up after ourselves.
-            stargazer.stop_streaming()
+            self.stargazer.stop_streaming()
+        
+
+    def callback_set_param(self, msg):
+        event_out_msg = 'e_failed'
+        if msg.data == "e_start_stream":
+            success = self.stargazer.start_streaming()
+            if success:
+                event_out_msg = 'e_streaming_started'
+
+        elif msg.data == "e_stop_stream":
+            success = self.stargazer.stop_streaming()
+            if success:
+                event_out_msg = 'e_streaming_stopped'
+            else:
+                success = self.stargazer.disconnect()
+                success = self.stargazer.connect()
+                success = self.stargazer.stop_streaming()
+
+            if success:
+                event_out_msg = 'e_streaming_stopped'
+
+        elif 'e_update' in msg.data:
+            success = self.stargazer.stop_streaming()
+            event_out_msg = self.update_parameters(msg.data)
+
+        elif msg.data == "e_connect":
+            rospy.loginfo('Reconnecting stargazer..')
+            success = self.stargazer.connect()
+            if success:
+                event_out_msg = 'e_connected'
+
+        elif msg.data == "e_disconnect":
+            rospy.loginfo('Disconnecting stargazer..')
+            success = self.stargazer.disconnect()
+            if success:
+                event_out_msg = 'e_disconnected'
+        else:
+            rospy.logwarn('Command is not in list.')
+        self.eventout_pub.publish(event_out_msg)
+
+    def update_parameters(self, msg):
+        event_out_msg = 'e_failed'
+        success = False
+        name_field = msg.split('_')[2]
+        if(name_field == 'param'):
+            parameters = self.get_options()
+            self.stargazer.stop_streaming()
+            for name, value in parameters.iteritems():
+                success = self.stargazer.set_parameter(name, value)
+                if not(success):
+                    break
+        else:
+            name = name_field
+            value = rospy.get_param('~'+name)
+            success = self.stargazer.set_parameter(name, value)
+
+        success = self.stargazer.set_parameter('SetEnd', '')
+
+        if success:
+            event_out_msg = 'e_parameter_updated'
+        return event_out_msg
+
+    def callback_raw_reponse(self, raw_response_msg):
+        #publishing raw response of the stargazer
+        msg = String()
+        msg.data = str(raw_response_msg)
+        self.rawresponse_pub.publish(msg)
+
+    def callback_raw(self, pose_dict):
+        marker_raw_poses_msg = MarkerRawPoses()
+        marker_raw_poses_msg.header.frame_id = 'stargazer_raw'
+
+        for pose in pose_dict:
+            marker_raw_pose = MarkerRawPose()
+            marker_raw_pose.marker_id.data = pose[0]
+            marker_raw_pose.position.x = pose[1]
+            marker_raw_pose.position.y = pose[2]
+            marker_raw_pose.position.z = pose[3]
+            marker_raw_pose.orientation.z = pose[4]
+            marker_raw_poses_msg.marker_poses.append(marker_raw_pose)
+
+        self.marker_poses_raw_pub.publish(marker_raw_poses_msg)
+
 
     def callback_global(self, pose_dict, unknown_ids):
         stamp = rospy.Time.now()
@@ -140,15 +240,35 @@ class StarGazerNode(object):
 
     def callback_local(self, pose_dict):
         stamp = rospy.Time.now()
+        marker_poses_msg = MarkerPoses()
+        marker_poses_msg.header.frame_id = self.stargazer_frame_id
 
         for marker_id, pose in pose_dict.iteritems():
             cartesian = pose[0:3, 3]
             quaternion = tf.transformations.quaternion_from_matrix(pose)
+            pos=Point()
+            pos.x = cartesian[0]
+            pos.y = cartesian[1]
+            pos.z = cartesian[2] 
+            quat=Quaternion()
+            quat.x = quaternion[0]
+            quat.y = quaternion[1]
+            quat.z = quaternion[2]
+            quat.w = quaternion[3]
+
+            marker_pose = MarkerRawPose()
+            marker_pose.marker_id.data = marker_id
+            marker_pose.position = pos
+            marker_pose.orientation = quat
+            marker_poses_msg.marker_poses.append(marker_pose)
+            
 
             frame_id = '{:s}{:s}'.format(self.marker_frame_prefix, marker_id)
             self.tf_broadcaster.sendTransform(
                 cartesian, quaternion, stamp, frame_id, self.stargazer_frame_id
             )
+
+        self.marker_poses_pub.publish(marker_poses_msg)
 
     def get_options(self):
         """ Gets StarGazer options from the ROS parameter server.
@@ -161,14 +281,14 @@ class StarGazerNode(object):
 
         # Distance from a StarGazer to a landmark; used when wanting to input
         # manually the height (in millimeters).
-        options['MarkHeight'] = rospy.get_param('~MarkHeight', 2400)
+        options['MarkHeight'] = rospy.get_param('~MarkHeight', 1847)
 
         # A total number of landmarks to be assigned under Map Mode.
-        options['IDNum'] = rospy.get_param('~IDNum', 4)
+        options['IDNum'] = rospy.get_param('~IDNum', 3)
         assert 0 <= options['IDNum'] < 4095
 
         # The number of reference ID under map mode.
-        options['RefID'] = rospy.get_param('~RefID', 2)
+        options['RefID'] = rospy.get_param('~RefID', 2916)
 
         # To determine how to get ThrVal; There are Auto and Manual. 'Manual'
         # should be assigned to use input data and 'Auto' be assigned to use a
@@ -179,7 +299,7 @@ class StarGazerNode(object):
         # To set up landmark type by use. There are Home and Office. Home means
         # HL1-1 landmark (up to 31 IDs) and Office means HL2-1 (up to 4095
         # IDs).
-        options['MarkType'] = rospy.get_param('~MarkType', 'Home')
+        options['MarkType'] = rospy.get_param('~MarkType', 'Office')
         assert options['MarkType'] in ['Home', 'Office']
 
         # To setup landmark type by height. There are different landmark types
