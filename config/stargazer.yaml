@@ -1,2 +1,2 @@
 stargazer_frame_id: /stargazer
-device_port: /dev/stargazer
+device_port: /dev/ttyUSB0

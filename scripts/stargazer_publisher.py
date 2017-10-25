@@ -89,11 +89,10 @@ class StarGazerNode(object):
 
         self.tf_static_pub = rospy.Publisher('tf_static', TFMessage, latch=True, queue_size=1)
         self.tf_static_pub.publish(map_tf_msg)
-        
+
         # Start publishing Stargazer data.
-        
+
         with StarGazer(**self.args) as self.stargazer:
-            '''
             # The StarGazer might be streaming data. Turn off streaming mode.
             self.stargazer.stop_streaming()
 
@@ -102,17 +101,17 @@ class StarGazerNode(object):
             # StarGazer is powered off.
             for name, value in parameters.iteritems():
                 self.stargazer.set_parameter(name, value)
+            self.stargazer._send_command('SetEnd')
 
             # Start streaming. ROS messages will be published in callbacks.
             self.stargazer.start_streaming()
-            '''
+
             rospy.loginfo('Stargazer Publisher node is running..')
-            self.stargazer.stop_streaming()
             rospy.spin()
 
             # Stop streaming. Try to clean up after ourselves.
             self.stargazer.stop_streaming()
-        
+
 
     def callback_set_param(self, msg):
         event_out_msg = 'e_failed'
@@ -198,7 +197,7 @@ class StarGazerNode(object):
 
     def callback_global(self, pose_dict, unknown_ids):
         stamp = rospy.Time.now()
-            
+
         # Print a warning about unmapped IDs.
         for unknown_id in unknown_ids - self.unknown_ids:
             rospy.logwarn('Detected marker ID %s that is not in the map.', unknown_id)
@@ -236,7 +235,7 @@ class StarGazerNode(object):
             self.pose_pub.publish(pose_cov_msg)
 
         self.pose_array_pub.publish(pose_array_msg)
-        
+
 
     def callback_local(self, pose_dict):
         stamp = rospy.Time.now()
@@ -249,7 +248,7 @@ class StarGazerNode(object):
             pos=Point()
             pos.x = cartesian[0]
             pos.y = cartesian[1]
-            pos.z = cartesian[2] 
+            pos.z = cartesian[2]
             quat=Quaternion()
             quat.x = quaternion[0]
             quat.y = quaternion[1]
@@ -261,7 +260,7 @@ class StarGazerNode(object):
             marker_pose.position = pos
             marker_pose.orientation = quat
             marker_poses_msg.marker_poses.append(marker_pose)
-            
+
 
             frame_id = '{:s}{:s}'.format(self.marker_frame_prefix, marker_id)
             self.tf_broadcaster.sendTransform(
@@ -322,7 +321,7 @@ class StarGazerNode(object):
         return options
 
 if __name__ == '__main__':
-    rospy.init_node('stargazer')
+    rospy.init_node('stargazer_publisher')
     node = StarGazerNode()
     node.run()
 

@@ -1,9 +1,9 @@
-MarkMode: Map
+MarkMode: Alone
 ThrVal: 210
-MarkHeight: 1847
+MarkHeight: 1440
 IDNum: 3
-RefID: 2916
+RefID: 114
 ThrAlg: Auto
-MarkType: Office
+MarkType: Home
 MarkDim: 1
-MapMode: Start
+MapMode: Stop

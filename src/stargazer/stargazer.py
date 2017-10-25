@@ -1,5 +1,5 @@
 """
-Driver class for Hagisonic Stargazer, with no ROS dependencies. 
+Driver class for Hagisonic Stargazer, with no ROS dependencies.
 """
 from serial import Serial
 from collections import deque
@@ -32,7 +32,7 @@ class StarGazer(object):
         """
         Connect to a Hagisonic StarGazer device and receive poses.
 
-        device:          The device location for the serial connection. 
+        device:          The device location for the serial connection.
 
         marker_map:      dictionary of marker transforms, formatted:
                          {marker_id: (4,4) matrix}
@@ -40,9 +40,9 @@ class StarGazer(object):
         callback_global: will be called whenever a new pose is received from the
                          Stargazer, will be called with (n,4,4) matrix of poses
                          of the location of the Stargazer in the global frame.
-                         These are computed from marker_map. 
+                         These are computed from marker_map.
 
-        callback_local: will be called whenever a new poses is received from the 
+        callback_local: will be called whenever a new poses is received from the
                         Stargazer, with a dict: {marker_id: [xyz, angle]}
         """
         self.device = device
@@ -103,7 +103,7 @@ class StarGazer(object):
     @property
     def is_streaming(self):
         """
-        Returns whether the driver is currently streaming pose data. 
+        Returns whether the driver is currently streaming pose data.
         """
         return self._thread is not None
 
@@ -158,7 +158,7 @@ class StarGazer(object):
         Arguments
         ---------
         command: string, or list. If string of single command, send just that.
-                 if list, reformat to add delimiter character 
+                 if list, reformat to add delimiter character
 
         Example
         -------
@@ -189,7 +189,7 @@ class StarGazer(object):
             success = self._read_response(response_expected)
             if(success):
                 rospy.loginfo('Parameters update successful')
-        
+
         return success
 
     def _read_response(self, response_expected):
@@ -201,7 +201,7 @@ class StarGazer(object):
                rospy.logwarn(str(e))
                sucess = False
                return success
-        
+
         # Scan for more incoming characters until we get a read timeout.
         # (This is useful if there is still some incoming data from previous
         # commands in intermediate serial buffers.)
@@ -230,7 +230,7 @@ class StarGazer(object):
                     .format(command_str, response_actual, response_expected)
                 )
                 '''
-
+        print response_actual
         if self._callback_raw_reponse:
                 self._callback_raw_reponse(response_actual)
 
@@ -239,7 +239,7 @@ class StarGazer(object):
     def _read(self):
         """
         Read from the serial connection to the StarGazer, process buffer,
-        then execute callbacks. 
+        then execute callbacks.
         """
         # Compute a regular expression that returns the last valid
         # message in a StarGazer stream.
@@ -325,8 +325,9 @@ class StarGazer(object):
             try:
                 message_buffer += self.connection.read(self._chunk_size)
                 message_buffer  = process_buffer(message_buffer)
+                print message_buffer
             except Exception as e:
-                rospy.logwarn('Error processing current buffer: %s (content: "%s")', 
+                rospy.logwarn('Error processing current buffer: %s (content: "%s")',
                     str(e), message_buffer
                 )
                 message_buffer  = ''
@@ -339,7 +340,7 @@ class StarGazer(object):
         self._stopped.set()
         self._send_command('CalcStop')
         self.connection.close()
-                
+
 def local_to_global(marker_map, local_poses):
     """
     Transform local marker coordinates to map coordinates.
@@ -366,7 +367,7 @@ def fourdof_to_matrix(translation, yaw):
     T[0:3,3] = translation
     return T
 
-def _callback_dummy(data): 
+def _callback_dummy(data):
     return
 
 def _callback_print(data):
