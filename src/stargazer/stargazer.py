@@ -285,7 +285,7 @@ class StarGazer(object):
                 for marker in markers:
                     # Parse pose information for this marker.
                     _id = marker.group('id')
-                    yaw = np.radians(float(marker.group('yaw')))
+                    yaw = -np.radians(float(marker.group('yaw')))
                     x = 0.01 * float(marker.group('x'))
                     y = 0.01 * float(marker.group('y'))
                     # Note: this axis is negated.
@@ -325,7 +325,6 @@ class StarGazer(object):
             try:
                 message_buffer += self.connection.read(self._chunk_size)
                 message_buffer  = process_buffer(message_buffer)
-                print message_buffer
             except Exception as e:
                 rospy.logwarn('Error processing current buffer: %s (content: "%s")',
                     str(e), message_buffer
