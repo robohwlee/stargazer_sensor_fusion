@@ -3,7 +3,7 @@ import rospy
 import numpy
 import tf
 from stargazer import StarGazer
-from std_msgs.msg import String
+from std_msgs.msg import String, Int16
 from geometry_msgs.msg import (Point, Quaternion, Pose, PoseArray,
                                Transform, TransformStamped,
                                PoseWithCovariance, PoseWithCovarianceStamped)
@@ -47,15 +47,14 @@ class StarGazerNode(object):
         self.eventin_sub = rospy.Subscriber("~event_in", String, self.callback_set_param)
         self.eventout_pub = rospy.Publisher("~event_out", String, queue_size=1)
         self.rawresponse_pub = rospy.Publisher("~raw_response", String, queue_size=1)
+        self.map_marker_sub = rospy.Subscriber("map_marker", Int16, self.callback_map_marker)
         self.unknown_ids = set()
 
     def run(self):
-        marker_map_temp = {}
-        #marker_map_temp['2916'] = [[1,0,0,0.032],[0,1,0,0.043],[0,0,1,1.84],[0,0,0,1]]
-        marker_map = rospy.get_param('~marker_map', marker_map_temp)
+        self.marker_map = rospy.get_param('~marker_map', {})
         self.args = {
             'device': rospy.get_param('~device_port', ''),
-            'marker_map': marker_map,
+            'marker_map': self.marker_map,
             'callback_global': self.callback_global,
             'callback_local': self.callback_local,
             'callback_raw': self.callback_raw,
@@ -79,7 +78,7 @@ class StarGazerNode(object):
         stamp_now = rospy.Time.now()
         map_tf_msg = TFMessage()
 
-        for marker_id, Tmap_marker in marker_map.iteritems():
+        for marker_id, Tmap_marker in self.marker_map.iteritems():
             marker_tf_msg = TransformStamped()
             marker_tf_msg.header.stamp = stamp_now
             marker_tf_msg.header.frame_id = self.fixed_frame_id
@@ -268,6 +267,20 @@ class StarGazerNode(object):
             )
 
         self.marker_poses_pub.publish(marker_poses_msg)
+
+    def callback_map_marker(self, msg):
+        stamp = rospy.Time(0.0)
+
+        # Find the transform from the Stargazer to the robot.
+        try:
+            marker_id = str(msg.data)
+            marker_frame_id = '{:s}{:s}'.format(self.marker_frame_prefix, marker_id)
+            Tmarker_fixed = tf_to_matrix(*self.tf_listener.lookupTransform(self.fixed_frame_id, marker_frame_id, stamp))
+            self.marker_map[marker_id] = Tmarker_fixed
+            print str(self.marker_map)
+        except tf.Exception as e:
+            rospy.logwarn('Failed looking up transform from "%s" to "%s": %s.',
+                          marker_frame_id, self.fixed_frame_id, str(e))
 
     def get_options(self):
         """ Gets StarGazer options from the ROS parameter server.
