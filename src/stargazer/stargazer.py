@@ -128,6 +128,14 @@ class StarGazer(object):
         success = self._send_command('CalcStop')
         return success
 
+    def reset_parameters(self):
+        """
+        Stop streaming pose data from the StarGazer.
+        """
+        assert self.is_connected and not self.is_streaming
+        success = self._send_command('Reset')
+        return success
+
     def set_parameter(self, name, value):
         """
         Set a StarGazer configuration parameter.
