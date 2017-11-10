@@ -38,6 +38,16 @@ def matrix_to_transform(mat):
 
 class StarGazerNode(object):
     def __init__(self):
+        self.marker_map = rospy.get_param('~marker_map', {})
+        self.fixed_frame_id = rospy.get_param('~fixed_frame_id', 'map')
+        self.robot_frame_id = rospy.get_param('~robot_frame_id', 'base_link')
+        self.stargazer_frame_id = rospy.get_param('~stargazer_frame_id', 'stargazer')
+        self.map_frame_prefix = rospy.get_param('~map_frame_prefix', 'stargazer/map_')
+        self.marker_frame_prefix = rospy.get_param('~marker_frame_prefix', 'stargazer/marker_')
+        self.covariance = rospy.get_param('~covariance', [0.01]*36)
+        if len(self.covariance) != 36:
+            raise Exception('The "covariance" parameter must be a 36 element vector.')
+
         self.tf_broadcaster = tf.TransformBroadcaster()
         self.tf_listener = tf.TransformListener()
         self.pose_pub = rospy.Publisher('robot_pose', PoseWithCovarianceStamped, queue_size=1)
@@ -51,29 +61,6 @@ class StarGazerNode(object):
         self.unknown_ids = set()
 
     def run(self):
-        self.marker_map = rospy.get_param('~marker_map', {})
-        self.args = {
-            'device': rospy.get_param('~device_port', ''),
-            'marker_map': self.marker_map,
-            'callback_global': self.callback_global,
-            'callback_local': self.callback_local,
-            'callback_raw': self.callback_raw,
-            'callback_raw_reponse': self.callback_raw_reponse,
-        }
-        parameters = self.get_options()
-
-        self.fixed_frame_id = rospy.get_param('~fixed_frame_id', 'map')
-        self.robot_frame_id = rospy.get_param('~robot_frame_id', 'base_link')
-        self.stargazer_frame_id = rospy.get_param('~stargazer_frame_id', 'stargazer')
-        self.map_frame_prefix = rospy.get_param('~map_frame_prefix', 'stargazer/map_')
-        self.marker_frame_prefix = rospy.get_param('~marker_frame_prefix', 'stargazer/marker_')
-        cov = [0.01]*36
-        self.covariance = rospy.get_param('~covariance', cov)
-        if self.covariance is None:
-            raise Exception('The "covariance" parameter is required.')
-        elif len(self.covariance) != 36:
-            raise Exception('The "covariance" parameter must be a 36 element vector.')
-
         # Publish static TF frames for the Stargazer map.
         stamp_now = rospy.Time.now()
         map_tf_msg = TFMessage()
@@ -89,18 +76,28 @@ class StarGazerNode(object):
         self.tf_static_pub = rospy.Publisher('tf_static', TFMessage, latch=True, queue_size=1)
         self.tf_static_pub.publish(map_tf_msg)
 
+        stargazer_args = {
+            'device': rospy.get_param('~device_port', ''),
+            'marker_map': self.marker_map,
+            'callback_global': self.callback_global,
+            'callback_local': self.callback_local,
+            'callback_raw': self.callback_raw,
+            'callback_raw_reponse': self.callback_raw_reponse,
+        }
+
         # Start publishing Stargazer data.
-
-        with StarGazer(**self.args) as self.stargazer:
-            # The StarGazer might be streaming data. Turn off streaming mode.
-            self.stargazer.stop_streaming()
-
-            # Set all parameters, possibly to their default values. This is the
-            # safest option because the parameters can be corrupted when the
+        with StarGazer(**stargazer_args) as self.stargazer:
+            # Set all parameters, possibly to their default values. This defaults to True
+            # as it is the safest option because the parameters can be corrupted when the
             # StarGazer is powered off.
-            for name, value in parameters.iteritems():
-                self.stargazer.set_parameter(name, value)
-            self.stargazer._send_command('SetEnd')
+            if rospy.get_param('~set_parameters', True):
+                # The StarGazer might be streaming data. Turn off streaming mode.
+                self.stargazer.stop_streaming()
+
+                parameters = self.get_options()
+                for name, value in parameters.iteritems():
+                    self.stargazer.set_parameter(name, value)
+                self.stargazer._send_command('SetEnd')
 
             # Start streaming. ROS messages will be published in callbacks.
             self.stargazer.start_streaming()
@@ -337,4 +334,3 @@ if __name__ == '__main__':
     rospy.init_node('stargazer_publisher')
     node = StarGazerNode()
     node.run()
-
