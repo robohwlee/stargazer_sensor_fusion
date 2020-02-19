@@ -205,8 +205,8 @@ class StarGazerNode(object):
         try:
             Tstargazer_robot = tf_to_matrix(
                 *self.tf_listener.lookupTransform(
-                    self.stargazer_frame_id, self.robot_frame_id, stamp) # from robot frame to star frame (i.e. from base_link to stargazer)
-            )
+                    self.stargazer_frame_id, self.robot_frame_id, stamp)
+            )   # from robot frame to stargazer frame (i.e. from base_link to stargazer)
         except tf.Exception as e:
             rospy.logwarn('Failed looking up transform from "%s" to "%s": %s.',
                 self.stargazer_frame_id, self.robot_frame_id, str(e))
