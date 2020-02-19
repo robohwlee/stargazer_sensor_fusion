@@ -65,11 +65,13 @@ class StarGazerNode(object):
         stamp_now = rospy.Time.now()
         map_tf_msg = TFMessage()
 
+        # make an transform msg for each marker using marker_map
+        # marker_map: dictionary of marker transforms, {marker_id: (4,4) matrix}  , (i.e. Tmap_makrer = (4,4) matrix)
         for marker_id, Tmap_marker in self.marker_map.iteritems():
             marker_tf_msg = TransformStamped()
             marker_tf_msg.header.stamp = stamp_now
-            marker_tf_msg.header.frame_id = self.fixed_frame_id
-            marker_tf_msg.child_frame_id = self.map_frame_prefix + marker_id
+            marker_tf_msg.header.frame_id = self.fixed_frame_id # map
+            marker_tf_msg.child_frame_id = self.map_frame_prefix + marker_id    # stargazer/map_ + (marker_id)
             marker_tf_msg.transform = matrix_to_transform(Tmap_marker)
             map_tf_msg.transforms.append(marker_tf_msg)
 
@@ -203,7 +205,7 @@ class StarGazerNode(object):
         try:
             Tstargazer_robot = tf_to_matrix(
                 *self.tf_listener.lookupTransform(
-                    self.stargazer_frame_id, self.robot_frame_id, stamp)
+                    self.stargazer_frame_id, self.robot_frame_id, stamp) # from robot frame to star frame (i.e. from base_link to stargazer)
             )
         except tf.Exception as e:
             rospy.logwarn('Failed looking up transform from "%s" to "%s": %s.',
@@ -236,7 +238,7 @@ class StarGazerNode(object):
     def callback_local(self, pose_dict):
         stamp = rospy.Time.now()
         marker_poses_msg = MarkerPoses()
-        marker_poses_msg.header.frame_id = self.stargazer_frame_id
+        marker_poses_msg.header.frame_id = self.stargazer_frame_id  # = stargazer
 
         for marker_id, pose in pose_dict.iteritems():
             cartesian = pose[0:3, 3]
@@ -306,7 +308,7 @@ class StarGazerNode(object):
         assert options['ThrAlg'] in ['Auto', 'Manual']
 
         # To set up landmark type by use. There are Home and Office. Home means
-        # HL1-1 landmark (up to 31 IDs) and Office means HL2-1 (up to 4095
+        # HLDn-S landmark (up to 31 IDs) and Office means HLDn-L (up to 4095
         # IDs).
         options['MarkType'] = rospy.get_param('~MarkType', 'Office')
         assert options['MarkType'] in ['Home', 'Office']

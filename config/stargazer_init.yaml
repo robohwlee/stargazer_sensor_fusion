@@ -1,9 +1,13 @@
-MarkMode: Alone
-ThrVal: 210
-MarkHeight: 1440
-IDNum: 3
-RefID: 114
+MarkMode: Map # Alone, Map
+ThrVal: 210 # 210 to 240
+MarkHeight: 2650  # manually input
+IDNum: 7  # A total number of landmarks under Map Mode
+RefID: 8692 # Ref ID under map mode
 ThrAlg: Auto
-MarkType: Home
-MarkDim: 1
-MapMode: Stop
+MarkType: Office  # home for HLDn-S / office for HLDn-L
+MarkDim: 1  # 1 for HLDn-2 
+MapMode: Start
+# If action under Map mode is required, set 'Start' and start map building
+
+# reference:
+# stargazer_publisher.py - get_options

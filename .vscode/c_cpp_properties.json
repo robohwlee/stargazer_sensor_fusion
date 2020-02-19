@@ -1,0 +1,27 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/hw/catkin_ws/devel/include/**",
+                "/home/hw/Desktop/Nav/devel/include/**",
+                "/opt/ros/kinetic/include/**",
+                "/home/hw/Desktop/Nav/src/base_local_planner/include/**",
+                "/home/hw/Desktop/Nav/src/costmap_converter/include/**",
+                "/home/hw/Desktop/Nav/src/custom_costmap/include/**",
+                "/home/hw/Desktop/Nav/src/scan_fining/include/**",
+                "/home/hw/Desktop/Nav/src/teb_local_planner/include/**",
+                "/usr/include/**"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}
