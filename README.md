@@ -15,7 +15,9 @@ ROS Version: Melodic
         # 보다 구체적인 정보는 emanual.robotis.com의 [ ROS ] Bringup을 참고
         1) [ Remote PC ]
             -Ctrl + Alt + T를 통해 새로운 터미널 창을 생성한다.
-                ```~$ roscore```        
+                ```bash
+                ~$ roscore
+                ```        
         2) [ TurtleBot ]
             - ssh 통신을 통해 Turtlebot의 computer에 원격 접속
                 ~$ ssh pi@172.24.191.99 # 공D617 기준
