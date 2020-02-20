@@ -53,7 +53,8 @@ class StarGazerNode(object):
         self.pose_pub = rospy.Publisher('robot_pose', PoseWithCovarianceStamped, queue_size=1)
         self.pose_array_pub = rospy.Publisher('robot_pose_array', PoseArray, queue_size=1)
         self.marker_poses_raw_pub = rospy.Publisher('marker_raw_poses', MarkerRawPoses, queue_size=1)
-        self.marker_poses_pub = rospy.Publisher('marker_poses', MarkerPoses, queue_size=1)
+        self.marker_poses_pub = rospy.Publisher('marker_poses', PoseWithCovarianceStamped, queue_size=1)
+        # self.marker_poses_pub = rospy.Publisher('marker_poses', MarkerPoses, queue_size=1)
         self.eventin_sub = rospy.Subscriber("~event_in", String, self.callback_set_param)
         self.eventout_pub = rospy.Publisher("~event_out", String, queue_size=1)
         self.rawresponse_pub = rospy.Publisher("~raw_response", String, queue_size=1)
@@ -235,6 +236,38 @@ class StarGazerNode(object):
         self.pose_array_pub.publish(pose_array_msg)
 
 
+    # 02.21 change the msg type from MarkerPoses to PoseWithCovarianceStamped
+    def callback_local(self, pose_dict):
+        stamp = rospy.Time.now()
+        marker_poses_msg = PoseWithCovarianceStamped()
+        marker_poses_msg.header.frame_id = self.stargazer_frame_id  # = stargazer
+
+        for marker_id, pose in pose_dict.iteritems():
+            cartesian = pose[0:3, 3]
+            quaternion = tf.transformations.quaternion_from_matrix(pose)
+            pos=Point()
+            pos.x = cartesian[0]
+            pos.y = cartesian[1]
+            pos.z = cartesian[2]
+            quat=Quaternion()
+            quat.x = quaternion[0]
+            quat.y = quaternion[1]
+            quat.z = quaternion[2]
+            quat.w = quaternion[3]
+            
+            marker_poses_msg = MarkerRawPose()
+            marker_poses_msg.header.frame_id = marker_id
+            marker_poses_msg.position = pos
+            marker_poses_msg.orientation = quat
+            
+            frame_id = '{:s}{:s}'.format(self.marker_frame_prefix, marker_id)
+            self.tf_broadcaster.sendTransform(
+                cartesian, quaternion, stamp, frame_id, self.stargazer_frame_id
+            )
+
+        self.marker_poses_pub.publish(marker_poses_msg)
+
+
     def callback_local(self, pose_dict):
         stamp = rospy.Time.now()
         marker_poses_msg = MarkerPoses()
@@ -266,6 +299,7 @@ class StarGazerNode(object):
             )
 
         self.marker_poses_pub.publish(marker_poses_msg)
+
 
     def callback_map_marker(self, msg):
         stamp = rospy.Time(0.0)
