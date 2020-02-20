@@ -7,15 +7,15 @@ ROS Version: Melodic
 
 [ 터틀봇3를 이용한 제어 ]
 
-    1.터틀봇 준비 
-        1) 로봇 Raspberry Pi에는 무선충전기를 통해 전원 공급
-        2) OpenCR에는 내장형 드론 배터리를 통해 전원 공급
+1.터틀봇 준비 
+>1) 로봇 Raspberry Pi에는 무선충전기를 통해 전원 공급
+>2) OpenCR에는 내장형 드론 배터리를 통해 전원 공급
 
-    2.Robot BringUp 
-        # 보다 구체적인 정보는 emanual.robotis.com의 [ ROS ] Bringup을 참고
-        1) [ Remote PC ]
-            -Ctrl + Alt + T를 통해 새로운 터미널 창을 생성한다.
-                ***~$ roscore***        
+2.Robot BringUp 
+# 보다 구체적인 정보는 emanual.robotis.com의 [ ROS ] Bringup을 참고
+>1) [ Remote PC ]
+>>-Ctrl + Alt + T를 통해 새로운 터미널 창을 생성한다.
+>>>~$ roscore        
         2) [ TurtleBot ]
             - ssh 통신을 통해 Turtlebot의 computer에 원격 접속
                 ***~$ ssh pi@172.24.191.99*** # 공D617 기준
