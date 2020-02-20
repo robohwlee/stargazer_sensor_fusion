@@ -179,9 +179,13 @@ class StarGazerNode(object):
         self.rawresponse_pub.publish(msg)
 
     def callback_raw(self, pose_dict):
+        
+        print("callback_raw is launched")
+        # test to check which callback fucntion is launched
+        
         marker_raw_poses_msg = MarkerRawPoses()
         marker_raw_poses_msg.header.frame_id = 'stargazer_raw'
-
+        
         for pose in pose_dict:
             marker_raw_pose = MarkerRawPose()
             marker_raw_pose.marker_id.data = pose[0]
@@ -195,6 +199,10 @@ class StarGazerNode(object):
 
 
     def callback_global(self, pose_dict, unknown_ids):
+        
+        print("callback_global is launched")
+        # test to check which callback fucntion is launched
+        
         stamp = rospy.Time.now()
 
         # Print a warning about unmapped IDs.
@@ -238,6 +246,10 @@ class StarGazerNode(object):
 
     # 02.21 change the msg type from MarkerPoses to PoseWithCovarianceStamped
     def callback_local(self, pose_dict):
+
+        print("callback_local is launched")
+        # test to check which callback fucntion is launched
+
         stamp = rospy.Time.now()
         marker_poses_msg = PoseWithCovarianceStamped()
         marker_poses_msg.header.frame_id = self.stargazer_frame_id  # = stargazer
@@ -269,6 +281,10 @@ class StarGazerNode(object):
 
 
     def callback_local(self, pose_dict):
+        
+        print("callback_local is launched")
+        # test to check which callback fucntion is launched
+
         stamp = rospy.Time.now()
         marker_poses_msg = MarkerPoses()
         marker_poses_msg.header.frame_id = self.stargazer_frame_id  # = stargazer
