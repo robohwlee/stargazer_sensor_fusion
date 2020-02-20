@@ -1,0 +1,391 @@
+<%
+  # Room template
+  #
+  # Generates a room and furnishes it
+  #
+  # Required variables
+  # * $o (number) Length of an office unit
+  # * $pi (number) Math::PI
+  # * $room_type (string) Must correspond to an obj mesh
+  # * $room_name (string) unique name for room
+  # * $room_floor (string) Must correspond to an obj mesh
+  # * $room_pose (array[6]) Pose of door's corner
+  # * $room_size (array[4]) In office units, [min_x, max_x, min_y, max_y]
+  # * $door_angle (number) Zero means the door is closed, ranges from 0 to pi.
+  #                        If the door is closed, the room is not furnished.
+  # * $floorplan (boolean) True if only showing floorplan, so doors, furniture and
+  #                        the collision above the door are hidden.
+  # * $target_areas ([]) Dictionary with target area info
+
+  # Wall height
+  height = 2 * $o
+
+  # Thickness for wall collisions
+  thickness = $g
+
+  # Length of space on each side of door, within its tile
+  door_side = 0.24
+
+  # Room corners in office units
+  min_x = $room_size[0]
+  max_x = $room_size[1]
+  min_y = $room_size[2]
+  max_y = $room_size[3]
+
+  # Calculate min/max/pivot points
+  room_frame = TMatrix($room_pose[0], $room_pose[1], $room_pose[5])
+
+  # If door is closed, room can't be target
+  if $door_angle != 0.0
+
+    # Drop in a 3.0 X 1.5 m area in front of room
+    drop_width = 3.0
+    drop_depth = 1.5
+    if $room_type == 'bathroom'
+      min_local_frame = TMatrix(-0.5*$o - drop_width * 0.5, 0, 0)
+      max_local_frame = TMatrix(-0.5*$o + drop_width * 0.5, drop_depth, 0)
+    # Drop in a 3.0 X 3.0 m area inside room
+    else
+      min_local_frame = TMatrix(- drop_width, -drop_width, 0)
+      max_local_frame = TMatrix(0.0, 0.0, 0)
+    end
+
+    # Adjust for room rotation
+    min_world_frame = room_frame * min_local_frame
+    max_world_frame = room_frame * max_local_frame
+
+    xs = [min_world_frame[0, 2], max_world_frame[0, 2]]
+    ys = [min_world_frame[1, 2], max_world_frame[1, 2]]
+
+    # Fill vectors
+    min = [xs.min, ys.min, $room_pose[2]]
+    max = [xs.max, ys.max, $room_pose[2]]
+
+    $target_areas.push({:name => $room_name, :min => min, :max => max})
+
+  end
+
+%>
+
+<model name="<%= $room_name %>">
+
+  <static>true</static>
+
+  <pose>
+    <%= $room_pose[0] %>
+    <%= $room_pose[1] %>
+    <%= $room_pose[2] %>
+    <%= $room_pose[3] %>
+    <%= $room_pose[4] %>
+    <%= $room_pose[5] %>
+  </pose>
+
+  <link name="link">
+
+    <%
+      # Wall collisions if door is open
+      if $door_angle != 0.0
+        width = max_x * $o + door_side
+        if width != 0.0
+    %>
+    <collision name="right_of_door">
+
+      <pose>
+        <%= width * 0.5 - door_side %>
+        <%= thickness * 0.5 %>
+        <%= height * 0.5 %>
+        0
+        0
+        0
+      </pose>
+
+      <geometry>
+        <box>
+          <size>
+            <%= width %>
+            <%= thickness %>
+            <%= height %>
+          </size>
+        </box>
+      </geometry>
+    </collision>
+    <% end %>
+
+    <%
+      width = -min_x * $o + door_side
+      if width != 0.0
+    %>
+    <collision name="left_of_door">
+
+      <pose>
+        <%= -$o - width * 0.5 + door_side %>
+        <%= thickness * 0.5 %>
+        <%= height * 0.5 %>
+        0
+        0
+        0
+      </pose>
+
+      <geometry>
+        <box>
+          <size>
+            <%= width %>
+            <%= thickness %>
+            <%= height %>
+          </size>
+        </box>
+      </geometry>
+    </collision>
+    <% end %>
+
+    <%
+      width = $o
+      h = 0.9
+      # leave the door hole on floorplan
+      if not $floorplan
+    %>
+    <collision name="top_of_door">
+
+      <pose>
+        <%= -width * 0.5 %>
+        <%= thickness * 0.5 %>
+        2.55
+        0
+        0
+        0
+      </pose>
+
+      <geometry>
+        <box>
+          <size>
+            <%= width %>
+            <%= thickness %>
+            <%= h %>
+          </size>
+        </box>
+      </geometry>
+    </collision>
+    <% end %>
+
+    <%
+      width = (max_y - min_y + 1) * $o
+    %>
+    <collision name="right">
+
+      <pose>
+        <%= max_x * $o + thickness * 0.5 %>
+        <%= -width * 0.5 %>
+        <%= height * 0.5 %>
+        0
+        0
+        0
+      </pose>
+
+      <geometry>
+        <box>
+          <size>
+            <%= thickness %>
+            <%= width %>
+            <%= height %>
+          </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <collision name="left">
+
+      <pose>
+        <%= (min_x - 1) * $o - thickness * 0.5 %>
+        <%= -width * 0.5 %>
+        <%= height * 0.5 %>
+        0
+        0
+        0
+      </pose>
+
+      <geometry>
+        <box>
+          <size>
+            <%= thickness %>
+            <%= width %>
+            <%= height %>
+          </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      width = (max_x - min_x + 1) * $o
+    %>
+    <collision name="back">
+
+      <pose>
+        <%= width * 0.5 + (min_x - 1) * $o %>
+        <%= (min_y - 1) * $o - thickness * 0.5 %>
+        <%= height * 0.5 %>
+        0
+        0
+        0
+      </pose>
+
+      <geometry>
+        <box>
+          <size>
+            <%= width %>
+            <%= thickness %>
+            <%= height %>
+          </size>
+        </box>
+      </geometry>
+    </collision>
+    <%
+      # A single collision if door is closed
+      else
+        box_size =
+        [
+          (max_x - min_x + 1) * $o,
+          (max_y - min_y + 1) * $o,
+          height
+        ]
+    %>
+    <collision name="box_collision">
+
+      <pose>
+        <%= box_size[0] * 0.5 + (min_x - 1) * $o %>
+        <%= -box_size[1] * 0.5 %>
+        <%= box_size[2] * 0.5 %>
+        0
+        0
+        0
+      </pose>
+
+      <geometry>
+        <box>
+          <size>
+            <%= box_size[0] %>
+            <%= box_size[1] %>
+            <%= box_size[2] %>
+          </size>
+        </box>
+      </geometry>
+    </collision>
+    <% end %>
+
+    <visual name="visual">
+      <geometry>
+        <mesh>
+          <uri>file://media/meshes/<%= $room_type %>.obj</uri>
+          <scale>0.01 0.01 0.01</scale>
+        </mesh>
+      </geometry>
+    </visual>
+
+    <!-- floor -->
+    <%
+      for x in (min_x..max_x)
+        for y in (min_y..max_y)
+    %>
+      <visual name="floor_<%= x %>_<%= y %>">
+
+        <pose>
+          <%= x * $o %>
+          <%= y * $o %>
+          0
+          0
+          0
+          0
+        </pose>
+
+        <geometry>
+          <mesh>
+            <uri>file://media/meshes/<%= $room_floor %>.obj</uri>
+            <scale>0.01 0.01 0.01</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    <%
+        end
+      end
+    %>
+
+  </link>
+
+<%
+  if not $floorplan
+%>
+  <%
+    if $door_angle == 0.0
+  %>
+    <link name="closed_door">
+      <pose><%= -$o * 0.5 %> <%= $g %> 0 0 0 <%= $pi %></pose>
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://door/meshes/door.obj</uri>
+            <scale>0.01 0.01 0.01</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://door/meshes/door.obj</uri>
+            <scale>0.01 0.01 0.01</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+  <% else %>
+
+    <link name="door_frame">
+      <pose><%= -$o * 0.5 %> <%= $g %> 0 0 0 <%= $pi %></pose>
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://door/meshes/door_frame.obj</uri>
+            <scale>0.01 0.01 0.01</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://door/meshes/door_frame.obj</uri>
+            <scale>0.01 0.01 0.01</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="door">
+      <pose>-0.3 -0.05 0 0 0 <%= $pi + $door_angle %></pose>
+      <collision name="collision">
+        <pose>0.45 -0.15 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://door/meshes/door_door.obj</uri>
+            <scale>0.01 0.01 0.01</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <pose>0.45 -0.15 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://door/meshes/door_door.obj</uri>
+            <scale>0.01 0.01 0.01</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <!-- Furniture if door is open -->
+    <%= fromFile(DIR + "/" + $room_type +  "_furniture.erb") %>
+  <% end %>
+
+<%
+  end # if not $floorplan
+%>
+
+</model>

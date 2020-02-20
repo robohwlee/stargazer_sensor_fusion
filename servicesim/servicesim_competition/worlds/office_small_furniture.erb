@@ -1,0 +1,41 @@
+<%
+  # Template for furniture for a small office
+  #
+  # Required variables
+  # * $o (number) length of an office unit
+  # * $pi (number) Math::Pi
+  # * $corner_objs (string[]) List of objects that can go on a corner
+
+  # So cubicle corners don't generate drop areas
+  $dropable = false
+%>
+
+<%
+  $cubicle_name = 'corner_1'
+  $pose =
+  [
+    1 * $o,
+    -2 * $o,
+    0,
+    0,
+    0,
+    -$pi * 0.5,
+  ]
+%>
+<%= fromFile(DIR + "/cubicle_corner.erb") %>
+
+<%
+  obj = $corner_objs.sample
+%>
+<include>
+  <pose>
+    1.1
+    -0.5
+    0
+    0
+    0
+    <%= $pi %>
+  </pose>
+  <uri>model://<%= obj %></uri>
+</include>
+

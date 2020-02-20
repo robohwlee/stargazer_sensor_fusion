@@ -1,0 +1,8 @@
+local_costmap:
+  global_frame: /odom
+  robot_base_frame: base_footprint
+  rolling_window: true
+  update_frequency: 5.0
+  publish_frequency: 5.0
+  inflation_radius: 0.4
+#TODO(mikaelarguedas) maybe need to specify map size and resolution later

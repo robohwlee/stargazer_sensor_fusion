@@ -1,0 +1,129 @@
+<%
+  # Template to generate an animated actor which moves along a given trajectory.
+  #
+  # Required variables
+  # * $actor_name (string) Unique name for the actor
+  # * $actor_skin (string) A skin Collada file from model://actor/meshes/
+  # * $actor_anim (string) An animation Collada file from model://actor/meshes/
+  # * $actor_velocity (double) Velocity for trajectory actors, in m/s
+  # * $actor_trajectory (array[array[6]]) Array or waypoint poses
+  # * $enable_collisions (boolean) True to enable actor collisions
+  # * $robot_name (string) Robot name
+  # * $traj_offset (number) Offset the trajectory points
+
+  # Cap given offset
+  desired_index = $traj_offset
+  while desired_index >= $actor_trajectory.length
+    desired_index -= $actor_trajectory.length
+  end
+
+  # Check that this trajectory + offset combination hasn't been used
+  index = desired_index
+  start_pose = $actor_trajectory[index]
+  while $traj_start_poses.include?(start_pose)
+
+    # If it has been used, keep getting new indices
+    index += 1
+    if index == ($actor_trajectory.length - 1)
+      index = 0
+    end
+
+    # If this trajectory is used up, fail generation
+    if index == desired_index
+      fail("Start pose " + start_pose[0].to_s + "  Index: " + index.to_s)
+    end
+
+    start_pose = $actor_trajectory[index]
+  end
+  $traj_start_poses.push(start_pose)
+
+  # Rearrange trajectory according to offset
+  traj = []
+
+  while traj.length < $actor_trajectory.length
+
+    while index >= $actor_trajectory.length
+      index -= $actor_trajectory.length
+    end
+
+    traj.push($actor_trajectory[index])
+
+    index += 1
+  end
+%>
+
+<%
+  if $enable_collisions
+%>
+
+<model name="<%= $actor_name %>_collision_model">
+  <pose>0 0 -100 0 0 0</pose>
+  <static>true</static>
+  <link name="link">
+    <collision name="link">
+      <pose>0 -0.18 0.05 0 <%= -$pi * 0.5 %> 0</pose>
+      <geometry>
+        <box>
+          <size>0.44 1.62 0.60</size>
+        </box>
+      </geometry>
+    </collision>
+  </link>
+</model>
+
+<% end %>
+
+<actor name="<%= $actor_name %>">
+
+  <!-- Starting pose, nice for when the world is reset -->
+  <pose>
+    <%= traj[0][0] %>
+    <%= traj[0][1] %>
+    <%= traj[0][2] %>
+    <%= traj[0][3] %>
+    <%= traj[0][4] %>
+    <%= traj[0][5] %>
+  </pose>
+
+  <skin>
+    <filename>model://actor/meshes/<%= $actor_skin %></filename>
+  </skin>
+
+  <animation name="animation">
+    <filename>model://actor/meshes/<%= $actor_anim %></filename>
+    <interpolate_x>true</interpolate_x>
+  </animation>
+
+  <plugin name="trajectory" filename="libTrajectoryActorPlugin.so">
+    <%
+      for pose in traj
+    %>
+      <target>
+        <%= pose[0] %>
+        <%= pose[1] %>
+        <%= pose[2] %>
+        <%= pose[3] %>
+        <%= pose[4] %>
+        <%= pose[5] %>
+      </target>
+    <% end %>
+
+    <velocity><%= $actor_velocity %></velocity>
+    <obstacle_margin>1.5</obstacle_margin>
+    <obstacle><%= $robot_name %></obstacle>
+
+  </plugin>
+
+  <!-- Enable collisions -->
+  <% if $enable_collisions %>
+    <plugin name="attach_model" filename="libAttachModelPlugin.so">
+      <link>
+        <link_name><%= $actor_name %>_pose</link_name>
+        <model>
+          <model_name><%= $actor_name %>_collision_model</model_name>
+        </model>
+      </link>
+    </plugin>
+  <% end %>
+
+</actor>

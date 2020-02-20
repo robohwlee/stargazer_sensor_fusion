@@ -1,0 +1,148 @@
+<%
+  # Template for a cubicle corner, which is a single desk
+  #
+  # Adds furniture if needed.
+  #
+  # Required variables
+  # * $pi (number) Math::PI
+  # * $cubicle_name (string) Model name
+  # * $pose (number[6]) Pose of island center
+  # * $floorplan (boolean) True if only showing floorplan, so computer and chair
+  #                        are hidden.
+  # * $target_areas ([]) Dictionary with target area info
+  # * $targetable (boolean) Whether to generate a targetable area for the cubicle
+
+  # Height of desk surface
+  top = 0.76
+
+  # Only covering one orientation for now
+  if $targetable and $pose[5] == $pi
+    target_size_x = 2.0
+    target_size_y = 3.0
+    min_x_world = $pose[0]
+    max_x_world = $pose[0] + target_size_x
+    min_y_world = $pose[1] + target_size_y - 1.0
+    max_y_world = $pose[1] + target_size_y
+    pivot_x = rand(min_x_world..max_x_world)
+    pivot_y = rand((max_y_world-0.2)..max_y_world)
+
+    $target_areas.push({:name => $cubicle_name,
+                      :min => [min_x_world, min_y_world, $pose[2]],
+                      :max => [max_x_world, max_y_world, $pose[2]],
+                      :pivot => [pivot_x, pivot_y, 0]})
+  end
+%>
+  <model name="<%= $cubicle_name %>">
+    <static>true</static>
+    <pose>
+      <%= $pose[0] %>
+      <%= $pose[1] %>
+      <%= $pose[2] %>
+      <%= $pose[3] %>
+      <%= $pose[4] %>
+      <%= $pose[5] %>
+    </pose>
+    <link name="link">
+      <%
+        a = 3.7 * 0.5
+        b = 1.5 * 0.5
+      %>
+      <collision name="collision_x">
+        <pose>
+          <%= -a * 0.5 %>
+          <%= -b * 0.5 %>
+          <%= top * 0.5 %>
+          0 0 0
+        </pose>
+        <geometry>
+          <box>
+            <size>
+              <%= a %>
+              <%= b %>
+              <%= top %>
+            </size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="collision_y">
+        <pose>
+          <%= -b * 0.5 %>
+          <%= -a * 0.5 %>
+          <%= top * 0.5 %>
+          0 0 0
+        </pose>
+        <geometry>
+          <box>
+            <size>
+              <%= b %>
+              <%= a %>
+              <%= top %>
+            </size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://cubicle_corner/meshes/cubicle_corner.obj</uri>
+            <scale>0.01 0.01 0.01</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+<%
+  if not $floorplan
+%>
+  <%
+    # offset if computer is on the far end
+    far_off = 1.22
+
+    # offset if computer is on the near end
+    near_off = 0.45
+
+    # placement axis
+    p = ['X', 'Y'].sample
+
+    if p == 'X'
+      comp_x = -far_off
+      comp_y = -near_off
+      comp_yaw = 0.0
+    else
+      comp_x = -near_off
+      comp_y = -far_off
+      comp_yaw = -$pi * 0.5
+    end
+  %>
+  <include>
+    <pose>
+      <%= comp_x %>
+      <%= comp_y %>
+      <%= top %>
+      0
+      0
+      <%= comp_yaw %>
+    </pose>
+    <uri>model://computer</uri>
+  </include>
+
+  <%
+     chair_x = (rand(1.13..1.4)) * -1
+     chair_y = (rand(1.13..2.0)) * -1
+
+     chair_yaw = $pi * 0.75 + rand(-0.7..0.7)
+  %>
+  <include>
+    <pose>
+      <%= chair_x %>
+      <%= chair_y %>
+      0
+      0
+      0
+      <%= chair_yaw %>
+    </pose>
+    <uri>model://office_chair</uri>
+  </include>
+<%
+  end # if not $floorplan
+%>
+  </model>

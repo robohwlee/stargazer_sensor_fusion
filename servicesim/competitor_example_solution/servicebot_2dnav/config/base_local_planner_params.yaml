@@ -1,0 +1,30 @@
+TrajectoryPlannerROS:
+  ## accel settings
+  # acc_lim_x: 1
+  # acc_lim_y: 1
+  # acc_lim_th: 3.2
+  ## linear vel settings
+  max_vel_x: 0.5
+  min_vel_x: 0.1
+  escape_vel: -0.2
+  ## angular vel settings
+  max_vel_theta: 1.0
+  min_vel_theta: -1.0
+  min_in_place_vel_theta: 0.4
+
+  ## forward sim params
+  sim_time: 5
+  # sim_granularity: 0.01
+
+  controller_frequency: 10.0
+  holonomic_robot: false
+
+  occdist_scale: 0.25
+  pdist_scale: 1.0
+  heading_scoring: false
+
+  # Goal Tolerance Parameters
+  yaw_goal_tolerance: 0.262  # ~15 degrees
+  xy_goal_tolerance: 0.3  # meters
+  # do not invalidate xy goal when turning for yaw goal
+  latch_xy_goal_tolerance: true
