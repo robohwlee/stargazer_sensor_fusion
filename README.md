@@ -15,6 +15,15 @@ ROS Version: Melodic
 
     2.Robot BringUp 
         // 보다 구체적인 정보는 emanual.robotis.com의 [ROS] Bringup을 참고
+        // 이 step을 거치기 전에 확인해야 할 작업
+        // [Remote PC]
+        // ~$ vim ~/.bashrc
+        // export ROS_MASTER_URI=http://172.24.173.92:11311 // 공D617 기준
+        // export ROS_HOSTNAME=172.24.173.92 // 공D617 기준
+        // [TurtleBot]
+        // export ROS_MASTER_URI=http://172.24.173.92:11311 // 공D617 기준
+        // export ROS_HOSTNAME=172.24.191.99 // 공D617 기준
+        
         1) [Remote PC]
             -Ctrl + Alt + T를 통해 새로운 터미널 창을 생성한다.
                 ~$ roscore        
