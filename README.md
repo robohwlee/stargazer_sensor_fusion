@@ -1,9 +1,9 @@
 # stargazer_sensor_fusion
 -localization using sensor fusion with IMU, odom and stargazer
 
-Author: Y.B.KIM
-Linux Version: 18.04.4 LTS (Bionic Beaver)
-ROS Version: Melodic
+Author: Y.B.KIM \n
+Linux Version: 18.04.4 LTS (Bionic Beaver) \n
+ROS Version: Melodic \n
 
 ---
 
