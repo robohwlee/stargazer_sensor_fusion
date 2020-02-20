@@ -58,7 +58,7 @@ class PoseRepresent:
 
         plt.plot(_x, _y, '.b') # '.b' = blue point mark at start point
         
-        plt.axis([-1, 1, -1, 1]) # x axis from -2 to 2, y axis from 0 to 3
+        plt.axis([0, 2, -1, 1]) # x axis from -2 to 2, y axis from 0 to 3
         
         plt.xlabel('horizontal(m)')
         plt.ylabel('vertical(m)')
