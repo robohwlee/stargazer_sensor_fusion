@@ -245,6 +245,7 @@ class StarGazerNode(object):
 
 
     # 02.21 change the msg type from MarkerPoses to PoseWithCovarianceStamped
+    # this is for single ID which got only one land mark(pose_dict)
     def callback_local(self, pose_dict):
 
         print("callback_local is launched")
@@ -255,7 +256,9 @@ class StarGazerNode(object):
         marker_poses_msg.header.frame_id = self.stargazer_frame_id  # = stargazer
 
         for marker_id, pose in pose_dict.iteritems():
+            print("pose=",pose)
             cartesian = pose[0:3, 3]
+            print("cartesian",cartesian)
             quaternion = tf.transformations.quaternion_from_matrix(pose)
             pos=Point()
             pos.x = cartesian[0]
@@ -267,54 +270,58 @@ class StarGazerNode(object):
             quat.z = quaternion[2]
             quat.w = quaternion[3]
             
-            marker_poses_msg = MarkerRawPose()
             marker_poses_msg.header.frame_id = marker_id
-            marker_poses_msg.position = pos
-            marker_poses_msg.orientation = quat
+            marker_poses_msg.pose.pose.position = pos
+            marker_poses_msg.pose.pose.orientation = quat
             
             frame_id = '{:s}{:s}'.format(self.marker_frame_prefix, marker_id)
+
             self.tf_broadcaster.sendTransform(
                 cartesian, quaternion, stamp, frame_id, self.stargazer_frame_id
             )
 
+        # specify covariance as it is required 
+        # marker_poses_msg.pose.covariance = 
+
+
         self.marker_poses_pub.publish(marker_poses_msg)
 
 
-    def callback_local(self, pose_dict):
+    # def callback_local(self, pose_dict):
         
-        print("callback_local is launched")
-        # test to check which callback fucntion is launched
+    #     print("callback_local is launched")
+    #     # test to check which callback fucntion is launched
 
-        stamp = rospy.Time.now()
-        marker_poses_msg = MarkerPoses()
-        marker_poses_msg.header.frame_id = self.stargazer_frame_id  # = stargazer
+    #     stamp = rospy.Time.now()
+    #     marker_poses_msg = MarkerPoses()
+    #     marker_poses_msg.header.frame_id = self.stargazer_frame_id  # = stargazer
 
-        for marker_id, pose in pose_dict.iteritems():
-            cartesian = pose[0:3, 3]
-            quaternion = tf.transformations.quaternion_from_matrix(pose)
-            pos=Point()
-            pos.x = cartesian[0]
-            pos.y = cartesian[1]
-            pos.z = cartesian[2]
-            quat=Quaternion()
-            quat.x = quaternion[0]
-            quat.y = quaternion[1]
-            quat.z = quaternion[2]
-            quat.w = quaternion[3]
+    #     for marker_id, pose in pose_dict.iteritems():
+    #         cartesian = pose[0:3, 3]
+    #         quaternion = tf.transformations.quaternion_from_matrix(pose)
+    #         pos=Point()
+    #         pos.x = cartesian[0]
+    #         pos.y = cartesian[1]
+    #         pos.z = cartesian[2]
+    #         quat=Quaternion()
+    #         quat.x = quaternion[0]
+    #         quat.y = quaternion[1]
+    #         quat.z = quaternion[2]
+    #         quat.w = quaternion[3]
 
-            marker_pose = MarkerRawPose()
-            marker_pose.marker_id.data = marker_id
-            marker_pose.position = pos
-            marker_pose.orientation = quat
-            marker_poses_msg.marker_poses.append(marker_pose)
+    #         marker_pose = MarkerRawPose()
+    #         marker_pose.marker_id.data = marker_id
+    #         marker_pose.position = pos
+    #         marker_pose.orientation = quat
+    #         marker_poses_msg.marker_poses.append(marker_pose)
 
 
-            frame_id = '{:s}{:s}'.format(self.marker_frame_prefix, marker_id)
-            self.tf_broadcaster.sendTransform(
-                cartesian, quaternion, stamp, frame_id, self.stargazer_frame_id
-            )
+    #         frame_id = '{:s}{:s}'.format(self.marker_frame_prefix, marker_id)
+    #         self.tf_broadcaster.sendTransform(
+    #             cartesian, quaternion, stamp, frame_id, self.stargazer_frame_id
+    #         )
 
-        self.marker_poses_pub.publish(marker_poses_msg)
+    #     self.marker_poses_pub.publish(marker_poses_msg)
 
 
     def callback_map_marker(self, msg):
