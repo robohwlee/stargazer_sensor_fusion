@@ -7,5 +7,24 @@
     <remap from="accel/filtered" to=""/>
     -->
 
+    <!-- specify topic names to fuse in ekf_template.yaml -->
+    <param name="imu_turtle" value = "/imu" />
+    <param name="odom_turtle" value = "/odom" />
+    <param name="odom_stargazer" value = "/marker_poses" />
+
+    <param name="star_init_x" value = "/marker_poses/marker_pose[0]/position/x"/>
+    <param name="star_init_y" value = "/marker_poses/marker_pose[0]/position/y"/>
+    <param name="star_init_z" value = "/marker_poses/marker_pose[0]/position/z"/>
+    <param name="star_init_y" value = "/marker_poses/marker_pose[0]/position/y"/>
+
+    <!-- start the filter with the specified state -->
+    <rosparam param="initial_sate">[5.0,  4.0,  3.0,
+                                  0.0,  0.0,  1.57,
+                                  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0]</rosparam>
+
+
+
   </node>
 </launch>

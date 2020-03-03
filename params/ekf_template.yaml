@@ -85,7 +85,7 @@ world_frame: odom           # Defaults to the value of odom_frame if unspecified
 
 # 일반 ODOM에서는 v, w 정보를 가져오자
 
-odom0: /odom # ODOMETRY
+odom0: odom_turtle # ODOMETRY
 odom0_config: [false, false, false, # x y z
                false, false, false, # roll pitch yaw
                true,  true,  true,  # v_x v_y v_z
@@ -127,7 +127,7 @@ odom0_pose_rejection_threshold: 5
 odom0_twist_rejection_threshold: 1
 
 # Further input parameter examples
-odom1: /marker_poses # STARGAZER
+odom1: odom_stargazer # STARGAZER
 odom1_config: [true, true, false,   # x y z
                false, false, true,  # roll pitch yaw
                false, false, false, # v_x v_y v_z
@@ -141,7 +141,7 @@ odom1_pose_rejection_threshold: 2
 odom1_twist_rejection_threshold: 0.2
 odom1_nodelay: false
 
-imu0: /imu # IMU
+imu0: imu_turtle # IMU
 imu0_config: [false, false, false, # x y z
               false, false, false, # roll pitch yaw
               false, false, false, # v_x v_y v_z
