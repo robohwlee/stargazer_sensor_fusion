@@ -14,7 +14,7 @@ http://wiki.ros.org/ROS/Installation
 User should be able to handle the turtlebot according to the following manual
 http://emanual.robotis.com/docs/en/platform/turtlebot3/setup/#setup
 
-### Power(Battery)
+#### Power(Battery)
 - LI-PO 11.1V 1800mAh LB-12 19.98Wh 5C battery for stargazer and OpenCR
 - LI-PO battery or any portable powerbank is possible for Raspberry Pi
 
@@ -26,7 +26,9 @@ http://www.coppeliarobotics.com/downloads.html
 ```bash
 dmesg |grep ttyUSB
 ```
-check /dev/ttyUSBn   (n: integer number)
+check the port number
+ex) /dev/ttyUSBn   (n: integer number)
+
 #### minicom
 ```bash
 sudo install minicom
@@ -34,15 +36,22 @@ sudo install minicom
 ```bash
 sudo minicom -s
 ```
+modify the port number as follows
+```bash
 serial port setup - A(Serial Device) - /dev/ttyUSBn (founded above)
+```
 
 #### check and open the port
 check status of the port
 ```bash
 ls -l /dev/ttyUSBn
 ```
+Your ttyUSBn should be displayed on the terminal
+Also, check 'crw-rw---- 1 root dialout' is displayed.
+If not, you should include user into dialout group fisrt
 
-authorize the port to read and write
+
+Authorize the port to read(4), write(2) and execute(1)
 ```bash
 chmod 777 /dev/ttyUSBn
 ```
@@ -53,15 +62,27 @@ chmod 777 /dev/ttyUSBn
 ## Run
 
 ### Turtlebot
+#### Network Configuration
+- Remote PC
+```bash
+ROS_MASTER_URI = http://IP_OF_REMOTE_PC:11311
+ROS_HOSTNAME = IP_OF_REMOTE_PC
+```
+- TurtleBot
+```bash
+ROS_MASTER_URI = http://IP_OF_REMOTE_PC:11311
+ROS_HOSTNAME = IP_OF_TURTLEBOT
+```
+
 #### Remote PC
 remote control for the turtlebot using ssh connection
+(You can directly connect keyboard, mouse, and monitor to Raspberry Pi)
 ```bash
 roscore
 ```
 ```bash
 ssh ${RASPBERRY_PI_NAME}@${REMOTE_IP}
 ```
-You can directly connect keyboard, mouse, and monitor to Raspberry Pi
 
 specify which model will be used
 ```bash
