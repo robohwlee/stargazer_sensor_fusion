@@ -11,15 +11,15 @@
     <param name="imu_turtle" value = "/imu" />
     <param name="odom_turtle" value = "/odom" />
     <param name="odom_stargazer" value = "/marker_poses" />
-
-    <param name="star_init_x" value = "/marker_poses/marker_pose[0]/position/x"/>
-    <param name="star_init_y" value = "/marker_poses/marker_pose[0]/position/y"/>
-    <param name="star_init_z" value = "/marker_poses/marker_pose[0]/position/z"/>
-    <param name="star_init_y" value = "/marker_poses/marker_pose[0]/position/y"/>
-
+    
+    <!-- calculated init pose topic -->
+    <param name="init_x" value = "/marker_poses/marker_pose[0]/position/x"/>
+    <param name="init_y" value = "/marker_poses/marker_pose[0]/position/y"/>
+    <param name="init_angle" value = "/marker_poses/marker_pose[0]/position/z"/>
+    
     <!-- start the filter with the specified state -->
-    <rosparam param="initial_sate">[5.0,  4.0,  3.0,
-                                  0.0,  0.0,  1.57,
+    <rosparam param="initial_sate">[init_x,  init_y,  0.0,
+                                  0.0,  0.0,  init_angle,
                                   0.0,  0.0,  0.0,
                                   0.0,  0.0,  0.0,
                                   0.0,  0.0,  0.0]</rosparam>
