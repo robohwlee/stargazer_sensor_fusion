@@ -29,7 +29,7 @@ dmesg |grep ttyUSB
 ```
 ex) FTDI USB Serial Device conveter now attached to /dev/ttyUSBn (n: integer number)
 
-#### minicom to change the port
+#### Use minicom or other tools to change the port number
 ```bash
 sudo install minicom
 ```
@@ -41,7 +41,7 @@ Modify the port number as follows
 serial port setup - A(Serial Device) - /dev/ttyUSBn (founded above)
 ```
 
-#### check and open the port
+#### Check and open the port
 - Status(Time and ttyUSBn should be displayed on the terminal)
 ```bash
 ls -l /dev/ttyUSBn
@@ -50,7 +50,7 @@ Also, the following message about dialout should be displayed
 ```bash
 crw-rw---- 1 root dialout
 ```
-If not, you should include user into dialout group fisrt
+If not, you should include user into 'dialout' group fisrt
 
 - Authorization
 ```bash
@@ -77,7 +77,7 @@ ROS_HOSTNAME = IP_OF_TURTLEBOT
 ```
 
 #### Remote PC
-Remote control for the turtlebot using ssh connection
+Remote control for the turtlebot using ssh connection (or directly connect to Pi)
 ```bash
 roscore
 ```
