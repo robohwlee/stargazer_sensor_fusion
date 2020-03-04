@@ -10,8 +10,8 @@ from stargazer import StarGazer
 from geometry_msgs.msg import (Point, Quaternion, Pose, PoseArray,
                                Transform, TransformStamped,
                                PoseWithCovariance, PoseWithCovarianceStamped)
+from stargazer.msg import InitPose                               
 from tf.transformations import euler_from_quaternion
-from auv_msgs.msg import RPY
 import numpy as np
 
 
@@ -59,13 +59,13 @@ class InitPoseCalculator:
                     self.marker.pose.pose.orientation.w,
                     self.marker.pose.pose.orientation.z)
         _roll, _pitch, _yaw = euler_from_quaternion(_quaternion)
-        self._angle = np.append(_angle, _yaw)
+        self._angle = np.append(self._angle, _yaw)
 
         self.pose_count += 1
         
         # _position = np.vstack([_x,_y])
-        if self.pose_count = self.count_limit:
-            _pose = np.stack([_x,_y,_angle], axis=0)
+        if self.pose_count == self.count_limit:
+            _pose = np.stack([self._x,self._y,self._angle], axis=0)
             self.averagedPose(_pose)
 
        
@@ -76,13 +76,11 @@ class InitPoseCalculator:
         stamp = rospy.Time.now()
         init_pose_msg = InitPose()
         init_pose_msg.header.stamp = stamp
-        init_pose_msg.header.frame_id = stargazer
+        init_pose_msg.header.frame_id = self.stargazer_frame_id
         init_pose_msg.position.x = np.mean(_pose[0, 10:40])
         init_pose_msg.position.y = np.mean(_pose[1, 10:40])
         init_pose_msg.position.z = 0
-        init_pose_msg.euler.roll = 0
-        init_pose_msg.euler.pitch = 0
-        init_pose_msg.euler.yaw = np.mean(_pose[2, 10:40])
+        init_pose_msg.angle = np.mean(_pose[2, 10:40])
         
         
         self.init_pose_pub.publish(init_pose_msg)

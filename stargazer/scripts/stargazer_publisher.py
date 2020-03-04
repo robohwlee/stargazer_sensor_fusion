@@ -256,9 +256,9 @@ class StarGazerNode(object):
         marker_poses_msg.header.frame_id = self.stargazer_frame_id  # = stargazer
 
         for marker_id, pose in pose_dict.iteritems():
-            print("pose=",pose)
+            # print("pose=",pose)
             cartesian = pose[0:3, 3]
-            print("cartesian",cartesian)
+            # print("cartesian",cartesian)
             quaternion = tf.transformations.quaternion_from_matrix(pose)
             pos=Point()
             pos.x = cartesian[0]
