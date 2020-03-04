@@ -30,7 +30,7 @@ class InitPoseCalculator:
         self.count_limit = 50
 
         # Initialize ros node
-        rospy.init_node('initial_pose_node', anonymous = True)
+        rospy.init_node('init_pose_publisher', anonymous = True)
         # Subscriber
         rospy.Subscriber('marker_poses', PoseWithCovarianceStamped, self.markerCallback, queue_size=1)
         # Publisher
