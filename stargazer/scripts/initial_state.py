@@ -79,7 +79,11 @@ class InitPoseCalculator:
         init_pose_msg.header.frame_id = stargazer
         init_pose_msg.position.x = np.mean(_pose[0, 10:40])
         init_pose_msg.position.y = np.mean(_pose[1, 10:40])
+        init_pose_msg.position.z = 0
+        init_pose_msg.euler.roll = 0
+        init_pose_msg.euler.pitch = 0
         init_pose_msg.euler.yaw = np.mean(_pose[2, 10:40])
+        
         
         self.init_pose_pub.publish(init_pose_msg)
 
