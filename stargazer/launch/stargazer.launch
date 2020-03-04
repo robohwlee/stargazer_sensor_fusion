@@ -9,5 +9,7 @@
         <rosparam command="load" file="$(find stargazer)/config/sino_map.yaml"/>
     </node>
 
+    <node pkg="stargazer" name="init_pose_publisher" type="initial_state.py" output="screen" respawn="true">
+
     <node pkg="tf" type="static_transform_publisher" name="stargazer_broadcaster" args="0 0 1.80 0 0 0 1 base_link  stargazer 100" respawn="true"/>
 </launch>

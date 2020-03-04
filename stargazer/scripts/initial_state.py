@@ -64,7 +64,7 @@ class InitPoseCalculator:
         self.pose_count += 1
         
         # _position = np.vstack([_x,_y])
-        if self.pose_count > self.count_limit:
+        if self.pose_count = self.count_limit:
             _pose = np.stack([_x,_y,_angle], axis=0)
             self.averagedPose(_pose)
 
