@@ -23,34 +23,37 @@ http://www.coppeliarobotics.com/downloads.html
 
 ### stargazer connection
 #### ttyUSB port connection
+Check the port number
 ```bash
 dmesg |grep ttyUSB
 ```
-check the port number
-ex) /dev/ttyUSBn   (n: integer number)
+ex) FTDI USB Serial Device conveter now attached to /dev/ttyUSBn (n: integer number)
 
-#### minicom
+#### minicom to change the port
 ```bash
 sudo install minicom
 ```
 ```bash
 sudo minicom -s
 ```
-modify the port number as follows
+Modify the port number as follows
 ```bash
 serial port setup - A(Serial Device) - /dev/ttyUSBn (founded above)
 ```
 
 #### check and open the port
-check status of the port
+-status
 ```bash
 ls -l /dev/ttyUSBn
 ```
-Your ttyUSBn should be displayed on the terminal
+Time and ttyUSBn should be displayed on the terminal
+
+- dialout
 Also, check 'crw-rw---- 1 root dialout' is displayed.
+
 If not, you should include user into dialout group fisrt
 
-
+- Authorization
 Authorize the port to read(4), write(2) and execute(1)
 ```bash
 chmod 777 /dev/ttyUSBn
@@ -75,7 +78,7 @@ ROS_HOSTNAME = IP_OF_TURTLEBOT
 ```
 
 #### Remote PC
-remote control for the turtlebot using ssh connection
+Remote control for the turtlebot using ssh connection
 (You can directly connect keyboard, mouse, and monitor to Raspberry Pi)
 ```bash
 roscore
@@ -100,6 +103,10 @@ roslaunch turtlebot3_bringup turtlebot3_remote.launch
 ```
 ```bash
 rosrun rviz rviz -d rospack find turtlebot3_description /rviz/model.rviz
+```
+- teleoperation
+```bash
+roslaunch turtlebot3_teleop turtlebot3_teleop_key.launch
 ```
 
 ### Stargazer
