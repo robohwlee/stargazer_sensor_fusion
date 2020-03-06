@@ -88,8 +88,8 @@ world_frame: odom           # Defaults to the value of odom_frame if unspecified
 odom0: odom_turtle # ODOMETRY
 odom0_config: [false, false, false, # x y z
                false, false, false, # roll pitch yaw
-               true,  true,  true,  # v_x v_y v_z
-               true, true, true,    # w_roll, w_pitch, w_yaw
+               true,  true,  false, # v_x v_y v_z
+               false, false,  true, # w_roll, w_pitch, w_yaw
                false, false, false] # a_x a_y a_z
 
 # If you have high-frequency data or are running with a low frequency parameter value, then you may want to increase
@@ -146,7 +146,7 @@ imu0_config: [false, false, false, # x y z
               false, false, false, # roll pitch yaw
               false, false, false, # v_x v_y v_z
               false, false, false, # w_roll, w_pitch, w_yaw
-              false,  true,  true] # a_x a_y a_z
+               true,  true, false] # a_x a_y a_z
 imu0_nodelay: false
 imu0_differential: false
 imu0_relative: true
