@@ -253,8 +253,9 @@ class StarGazerNode(object):
 
         stamp = rospy.Time.now()
         marker_poses_msg = PoseWithCovarianceStamped()
+        marker_poses_msg.header.stamp = stamp
         marker_poses_msg.header.frame_id = self.stargazer_frame_id  # = stargazer
-
+        
         for marker_id, pose in pose_dict.iteritems():
             # print("pose=",pose)
             cartesian = pose[0:3, 3]
