@@ -10,16 +10,27 @@ will be updated for other mobile robots
 ### ROS
 http://wiki.ros.org/ROS/Installation
 
+#### v-rep(optional)
+http://www.coppeliarobotics.com/downloads.html
+
 ### Turtlebot3(burger used)
 User should be able to handle the turtlebot according to the following manual
 http://emanual.robotis.com/docs/en/platform/turtlebot3/setup/#setup
 
+#### Network Configuration
+- Remote PC
+```bash
+ROS_MASTER_URI = http://IP_OF_REMOTE_PC:11311
+ROS_HOSTNAME = IP_OF_REMOTE_PC
+```
+- TurtleBot
+```bash
+ROS_MASTER_URI = http://IP_OF_REMOTE_PC:11311
+ROS_HOSTNAME = IP_OF_TURTLEBOT
+```
 #### Power(Battery)
 - LI-PO 11.1V 1800mAh LB-12 19.98Wh 5C battery for stargazer and OpenCR
 - LI-PO battery or any portable powerbank is possible for Raspberry Pi
-
-### v-rep(optional)
-http://www.coppeliarobotics.com/downloads.html
 
 ### stargazer connection
 #### ttyUSB port connection
@@ -64,18 +75,6 @@ Authorize the port to read(4), write(2) and execute(1)
 ## Run
 
 ### Turtlebot
-#### Network Configuration
-- Remote PC
-```bash
-ROS_MASTER_URI = http://IP_OF_REMOTE_PC:11311
-ROS_HOSTNAME = IP_OF_REMOTE_PC
-```
-- TurtleBot
-```bash
-ROS_MASTER_URI = http://IP_OF_REMOTE_PC:11311
-ROS_HOSTNAME = IP_OF_TURTLEBOT
-```
-
 #### Remote PC
 Remote control for the turtlebot using ssh connection (or directly connect to Pi)
 ```bash
