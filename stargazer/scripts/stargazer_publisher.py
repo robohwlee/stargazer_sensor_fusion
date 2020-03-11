@@ -226,12 +226,15 @@ class StarGazerNode(object):
         pose_array_msg = PoseArray()
         pose_array_msg.header.stamp = stamp
         pose_array_msg.header.frame_id = self.fixed_frame_id
-
+        # print("in callback global pose_dict=", pose_dict)
+        
         for marker_id, Tmap_stargazer in pose_dict.iteritems():
             # Convert the 'map -> stargazer' transform into a 'map -> robot' pose.
             Tmap_robot = numpy.dot(Tmap_stargazer, Tstargazer_robot)
+            print("Tmap_stargazer",Tmap_stargazer)
             pose_msg = matrix_to_pose(Tmap_robot)
             pose_array_msg.poses.append(pose_msg)
+            # print("pose_msg=", pose_msg)
 
             # Publish the output to a ROS message.
             pose_cov_msg = PoseWithCovarianceStamped()
@@ -248,14 +251,14 @@ class StarGazerNode(object):
     # this is for single ID which got only one land mark(pose_dict)
     def callback_local(self, pose_dict):
 
-        print("callback_local is launched")
+        # print("callback_local is launched")
         # test to check which callback fucntion is launched
 
         stamp = rospy.Time.now()
         marker_poses_msg = PoseWithCovarianceStamped()
         marker_poses_msg.header.stamp = stamp
         marker_poses_msg.header.frame_id = self.stargazer_frame_id  # = stargazer
-        
+        # print("pose_dict=", pose_dict)
         for marker_id, pose in pose_dict.iteritems():
             # print("pose=",pose)
             cartesian = pose[0:3, 3]
@@ -270,7 +273,8 @@ class StarGazerNode(object):
             quat.y = quaternion[1]
             quat.z = quaternion[2]
             quat.w = quaternion[3]
-            print("Detected marker id is", marker_id)
+            # print("Detected marker id is", marker_id)
+
             # marker_poses_msg.header.frame_id = marker_id
             marker_poses_msg.pose.pose.position = pos
             marker_poses_msg.pose.pose.orientation = quat
@@ -327,13 +331,15 @@ class StarGazerNode(object):
 
     def callback_map_marker(self, msg):
         stamp = rospy.Time(0.0)
-
+        print("cb map_marker launched")
         # Find the transform from the Stargazer to the robot.
         try:
             marker_id = str(msg.data)
+            print("in callback mapmarker, marker_id = ",marker_id)
             marker_frame_id = '{:s}{:s}'.format(self.marker_frame_prefix, marker_id)
             Tmarker_fixed = tf_to_matrix(*self.tf_listener.lookupTransform(self.fixed_frame_id, marker_frame_id, stamp))
             self.marker_map[marker_id] = Tmarker_fixed
+            print("in callback mapmarker, marker_map = ",self.marker_map[marker_id])
             print str(self.marker_map)
         except tf.Exception as e:
             rospy.logwarn('Failed looking up transform from "%s" to "%s": %s.',
@@ -380,12 +386,12 @@ class StarGazerNode(object):
         # To determine whether map building is executed or not. There are Start
         # and Stop. If action under Map Mode is required, you should set the
         # parameter to 'Start' and start Map Building.
-        options['MapMode'] = rospy.get_param('~MapMode', 'Stop')
+        options['MapMode'] = rospy.get_param('~MapMode', 'Start')
         assert options['MapMode'] in ['Start', 'Stop']
 
         # To determine whether landmarks are used independently under Alone
         # Mode or not (dependently under Map Mode). There are Alone and Map.
-        options['MarkMode'] = rospy.get_param('~MarkMode', 'Alone')
+        options['MarkMode'] = rospy.get_param('~MarkMode', 'Map')
         assert options['MarkMode'] in ['Alone', 'Map']
 
         return options

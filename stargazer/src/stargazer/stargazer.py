@@ -311,10 +311,12 @@ class StarGazer(object):
 
                 if self._callback_local:
                     self._callback_local(local_poses)
+                    # print("_callback_local is launched with local_poses",local_poses) # work successfully
 
                 if self._callback_global:
                     global_poses, unknown_ids = local_to_global(self.marker_map,
                                                                 local_poses)
+                    print("_callback_global is launched with global_poses",global_poses)
                     self._callback_global(global_poses, unknown_ids)
 
             elif message.group('type') == NOTIFY:
@@ -356,11 +358,14 @@ def local_to_global(marker_map, local_poses):
     unknown_ids = set()
 
     for _id, pose in local_poses.iteritems():
+        print("_id=",_id)
+        print("marker_map",marker_map)
         if _id in marker_map:
             marker_to_map   = marker_map[_id]
             local_to_marker = np.linalg.inv(pose)
             local_to_map    = np.dot(marker_to_map, local_to_marker)
             global_poses[_id] = local_to_map
+            print("global_pose[_id]=",global_poses)
         else:
             unknown_ids.add(_id)
 
