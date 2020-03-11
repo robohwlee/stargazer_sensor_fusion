@@ -180,7 +180,7 @@ class StarGazerNode(object):
 
     def callback_raw(self, pose_dict):
         
-        print("callback_raw is launched")
+        # print("callback_raw is launched")
         # test to check which callback fucntion is launched
         
         marker_raw_poses_msg = MarkerRawPoses()
@@ -200,7 +200,7 @@ class StarGazerNode(object):
 
     def callback_global(self, pose_dict, unknown_ids):
         
-        print("callback_global is launched")
+        # print("callback_global is launched")
         # test to check which callback fucntion is launched
         
         stamp = rospy.Time.now()
@@ -270,8 +270,8 @@ class StarGazerNode(object):
             quat.y = quaternion[1]
             quat.z = quaternion[2]
             quat.w = quaternion[3]
-            
-            marker_poses_msg.header.frame_id = marker_id
+            print("Detected marker id is", marker_id)
+            # marker_poses_msg.header.frame_id = marker_id
             marker_poses_msg.pose.pose.position = pos
             marker_poses_msg.pose.pose.orientation = quat
             
