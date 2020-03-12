@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import time
 import numpy as np
 from stargazer import StarGazer
+from geometry_msgs.msg import PoseWithCovarianceStamped
 from stargazer.msg import (MarkerPose, MarkerPoses,
                            MarkerRawPose, MarkerRawPoses)
 
@@ -23,7 +24,9 @@ class PoseRepresent:
         # Initialize ros node
         rospy.init_node('pose_represent', anonymous = True)
         # Subscriber
-        rospy.Subscriber('marker_poses', MarkerPoses, self.markerCallback, queue_size=1)
+        # rospy.Subscriber('marker_poses', MarkerPoses, self.markerCallback, queue_size=1)
+        # rospy.Subscriber('marker_poses', PoseWithCovarianceStamped, self.markerCallback, queue_size=1)    # local pose
+        rospy.Subscriber('robot_pose', PoseWithCovarianceStamped, self.markerCallback, queue_size=1)    # global pose
         
 
     def spin(self):
@@ -47,18 +50,18 @@ class PoseRepresent:
         
         plt.ion()
         
-        _x = self.marker.marker_poses[0].position.x
-        _y = self.marker.marker_poses[0].position.y
+        _x = self.marker.pose.pose.position.x
+        _y = self.marker.pose.pose.position.y
 
         # for marker in self.marker.marker_poses:
         
         #     _x.append(marker.position.x)
         #     _y.append(marker.position.x)
-            
+        print(_x,_y)
 
         plt.plot(_x, _y, '.b') # '.b' = blue point mark at start point
         
-        plt.axis([0, 2, -1, 1]) # x axis from -2 to 2, y axis from 0 to 3
+        plt.axis([-1, 2, 0, 2]) # x axis from -2 to 2, y axis from 0 to 3
         
         plt.xlabel('horizontal(m)')
         plt.ylabel('vertical(m)')
@@ -69,7 +72,7 @@ class PoseRepresent:
         self.timer += 1
         # if self.timer % 20 == 0:
         #     plt.clf()
-        print("end of the graph")
+        # print("end of the graph")
         # print("time: ", time.time() - self.start_t) # check calculated time
 
 

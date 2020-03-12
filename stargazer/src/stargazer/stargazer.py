@@ -305,6 +305,7 @@ class StarGazer(object):
                     # Convert the pose to a transform and store it by ID.
                     marker_to_stargazer = fourdof_to_matrix((x, y, z), yaw)
                     local_poses[_id] = np.linalg.inv(marker_to_stargazer)
+                    # print('local poses =', local_poses[_id])
 
                 if self._callback_raw:
                     self._callback_raw(raw_poses)
@@ -318,7 +319,8 @@ class StarGazer(object):
                     #                                             local_poses)
                     global_poses, unknown_ids = local_to_global_wo_check(self.marker_map,
                                                                 local_poses)
-                    print("_callback_global is launched with global_poses :",global_poses)
+                    
+                    # print("_callback_global is launched with global_poses :",global_poses)
                     self._callback_global(global_poses, unknown_ids)
 
             elif message.group('type') == NOTIFY:
@@ -381,14 +383,19 @@ def local_to_global_wo_check(marker_map, local_poses):
     unknown_ids = set()
 
     for _id, pose in local_poses.iteritems():
-        print("_id=",_id)
-        print("marker_map",marker_map)
-        marker_to_map   = marker_map[_id]
-        local_to_marker = np.linalg.inv(pose)
-        local_to_map    = np.dot(marker_to_map, local_to_marker)
-        global_poses[_id] = local_to_map
+        # print("_id=",_id)
+        # print("marker_map",marker_map)
+        
+        # marker_to_map   = local_poses[_id]  # doesn't work
+        
+        
+        # local_to_marker = np.linalg.inv(pose)
+        # local_to_map    = np.dot(marker_to_map, local_to_marker)
+        global_poses[_id] = local_poses[_id]
+
         print("global_pose[_id]=",global_poses)
-    
+        unknown_ids.add(_id)
+
     return global_poses, unknown_ids
 
 def fourdof_to_matrix(translation, yaw):

@@ -230,11 +230,10 @@ class StarGazerNode(object):
         
         for marker_id, Tmap_stargazer in pose_dict.iteritems():
             # Convert the 'map -> stargazer' transform into a 'map -> robot' pose.
+            # print("Tmap_stargazer in callback = ", Tmap_stargazer)
             Tmap_robot = numpy.dot(Tmap_stargazer, Tstargazer_robot)
-            print("Tmap_stargazer",Tmap_stargazer)
             pose_msg = matrix_to_pose(Tmap_robot)
             pose_array_msg.poses.append(pose_msg)
-            # print("pose_msg=", pose_msg)
 
             # Publish the output to a ROS message.
             pose_cov_msg = PoseWithCovarianceStamped()
@@ -257,7 +256,7 @@ class StarGazerNode(object):
         stamp = rospy.Time.now()
         marker_poses_msg = PoseWithCovarianceStamped()
         marker_poses_msg.header.stamp = stamp
-        marker_poses_msg.header.frame_id = self.stargazer_frame_id  # = stargazer
+        # marker_poses_msg.header.frame_id = self.stargazer_frame_id  # = stargazer
         # print("pose_dict=", pose_dict)
         for marker_id, pose in pose_dict.iteritems():
             # print("pose=",pose)
@@ -278,7 +277,8 @@ class StarGazerNode(object):
             # marker_poses_msg.header.frame_id = marker_id
             marker_poses_msg.pose.pose.position = pos
             marker_poses_msg.pose.pose.orientation = quat
-            
+            marker_poses_msg.header.frame_id = marker_id
+
             frame_id = '{:s}{:s}'.format(self.marker_frame_prefix, marker_id)
 
             self.tf_broadcaster.sendTransform(
