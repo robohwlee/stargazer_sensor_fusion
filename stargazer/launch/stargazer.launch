@@ -6,7 +6,7 @@
 
         <rosparam command="load" file="$(find stargazer)/config/stargazer.yaml"/>
         <rosparam command="load" file="$(find stargazer)/config/stargazer_init.yaml"/>
-        <rosparam command="load" file="$(find stargazer)/config/sino_map.yaml"/>
+        <!-- <rosparam command="load" file="$(find stargazer)/config/sino_map.yaml"/> -->
     </node>
 
     <!-- <node pkg="stargazer" name="init_pose_publisher" type="initial_state.py" output="screen" respawn="true"/> -->

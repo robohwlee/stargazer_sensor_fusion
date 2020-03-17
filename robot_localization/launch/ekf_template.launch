@@ -13,16 +13,16 @@
     <param name="odom_stargazer" value = "/marker_poses" />
     
     <!-- calculated init pose topic -->
-    <param name="init_x" value = "/marker_poses/marker_pose[0]/position/x"/>
+    <!-- <param name="init_x" value = "/marker_poses/marker_pose[0]/position/x"/>
     <param name="init_y" value = "/marker_poses/marker_pose[0]/position/y"/>
-    <param name="init_angle" value = "/marker_poses/marker_pose[0]/position/z"/>
+    <param name="init_angle" value = "/marker_poses/marker_pose[0]/position/z"/> -->
     
     <!-- start the filter with the specified state -->
-    <rosparam param="initial_sate">[init_x,  init_y,  0.0,
+    <!-- <rosparam param="initial_sate">[init_x,  init_y,  0.0,
                                   0.0,  0.0,  init_angle,
                                   0.0,  0.0,  0.0,
                                   0.0,  0.0,  0.0,
-                                  0.0,  0.0,  0.0]</rosparam>
+                                  0.0,  0.0,  0.0]</rosparam> -->
 
 
 
