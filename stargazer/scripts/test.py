@@ -16,28 +16,37 @@ class PoseRepresent:
     def __init__(self):
         
         # ROS parameters
-        # self.obstacle_topic = rospy.get_param("/obstacle_predictor/obstacle_topic")
-        self.step = []
-        self.count = 0
-        self.timer = 0
+        rospy.set_param('vrpn_client_node/RigidBody/pose', 'optitrack')
+        rospy.set_param('step', [])
+        rospy.set_param('count', 0)
+        rospy.set_param('timer', 0)
 
         # Initialize ros node
         rospy.init_node('pose_represent', anonymous = True)
         # Subscriber
-        # rospy.Subscriber('marker_poses', MarkerPoses, self.markerCallback, queue_size=1)
-        # rospy.Subscriber('marker_poses', PoseWithCovarianceStamped, self.markerCallback, queue_size=1)    # local pose
-        rospy.Subscriber('robot_pose', PoseWithCovarianceStamped, self.markerCallback, queue_size=1)    # global pose
+        rospy.Subscriber('marker_poses', PoseWithCovarianceStamped, self.markerCallback, queue_size=1)    # local pose
+        rospy.Subscriber('robot_pose', PoseWithCovarianceStamped, self.robotCallback, queue_size=1)    # global pose
+        rospy.Subscriber('optitrack', PoseStamped, self.groundCallback, queue_size=1)    # global pose
         
 
     def spin(self):
         rospy.spin()
 
 
+    def robotCallback(self, msg):
+        
+        self.robotpose = msg
+        self.poseGraph()
+
+
     def markerCallback(self, msg):
         
-        self.start_t = time.time()
-        self.marker = msg
-        self.poseGraph()
+        self.markerpose = msg
+
+
+    def groundCallback(self, msg):
+        
+        self.groundTruth = msg
 
 
     def poseGraph(self):
@@ -45,21 +54,19 @@ class PoseRepresent:
         draw the mesearued pose
         '''
         
-        # _x = []
-        # _y = []
-        
         plt.ion()
         
-        _x = self.marker.pose.pose.position.x
-        _y = self.marker.pose.pose.position.y
+        x_robot = self.robotpose.pose.pose.position.x
+        y_robot = self.robotpose.pose.pose.position.y
 
-        # for marker in self.marker.marker_poses:
-        
-        #     _x.append(marker.position.x)
-        #     _y.append(marker.position.x)
-        print(_x,_y)
+        x_truth = self.groundTruth.pose.position.x
+        y_truth = self.groundTruth.pose.position.y
 
-        plt.plot(_x, _y, '.b') # '.b' = blue point mark at start point
+        print("Robot pose   = ",x_robot, y_robot)
+        print("Ground truth = ",x_truth, y_truth)
+
+        plt.plot(x_robot, y_robot, '.b') # '.b' = blue point mark at start point
+        plt.plot(x_truth, y_truth, '.r') # '.b' = red point mark at start point
         
         plt.axis([-1, 2, 0, 2]) # x axis from -2 to 2, y axis from 0 to 3
         
