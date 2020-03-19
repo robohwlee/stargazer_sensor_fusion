@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import time
 import numpy as np
 from stargazer import StarGazer
-from geometry_msgs.msg import PoseWithCovarianceStamped
+from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 from stargazer.msg import (MarkerPose, MarkerPoses,
                            MarkerRawPose, MarkerRawPoses)
 
