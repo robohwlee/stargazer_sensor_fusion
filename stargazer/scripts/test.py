@@ -33,20 +33,21 @@ class PoseRepresent:
         rospy.spin()
 
 
+    def markerCallback(self, msg):
+        
+        self.markerpose = msg
+
+
     def robotCallback(self, msg):
         
         self.robotpose = msg
         self.poseGraph()
 
 
-    def markerCallback(self, msg):
-        
-        self.markerpose = msg
-
-
     def groundCallback(self, msg):
         
         self.groundTruth = msg
+        self.poseGraph()
 
 
     def poseGraph(self):
