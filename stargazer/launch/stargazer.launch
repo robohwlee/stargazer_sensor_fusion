@@ -1,8 +1,10 @@
 <launch>
-    <arg name="set_parameters" default="false"/>
+    <arg name="set_parameters"  default="false"/>
+    <arg name="timer"           default="0"/>
 
     <node pkg="stargazer" name="stargazer_publisher"  type="stargazer_publisher.py" output="screen" respawn="true">
-        <param name="set_parameters" value="$(arg set_parameters)"/>
+        <param name="set_parameters"    value="$(arg set_parameters)"/>
+        <param name="timer"             value="$(arg timer)"/>
 
         <rosparam command="load" file="$(find stargazer)/config/stargazer.yaml"/>
         <rosparam command="load" file="$(find stargazer)/config/stargazer_init.yaml"/>

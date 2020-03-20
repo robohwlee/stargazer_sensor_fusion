@@ -16,17 +16,16 @@ class PoseRepresent:
     def __init__(self):
         
         # ROS parameters
-        rospy.set_param('vrpn_client_node/RigidBody/pose', 'optitrack')
-        rospy.set_param('step', [])
-        rospy.set_param('count', 0)
-        rospy.set_param('timer', 0)
+        # rospy.set_param('step', [])
+        # rospy.set_param('count', 0)
+        # self.timer = 0
 
         # Initialize ros node
         rospy.init_node('pose_represent', anonymous = True)
         # Subscriber
         rospy.Subscriber('marker_poses', PoseWithCovarianceStamped, self.markerCallback, queue_size=1)    # local pose
         rospy.Subscriber('robot_pose', PoseWithCovarianceStamped, self.robotCallback, queue_size=1)    # global pose
-        rospy.Subscriber('optitrack', PoseStamped, self.groundCallback, queue_size=1)    # global pose
+        rospy.Subscriber('vrpn_client_node/RigidBody/pose', PoseStamped, self.groundCallback, queue_size=1)    # global pose
         
 
     def spin(self):
@@ -47,7 +46,7 @@ class PoseRepresent:
     def groundCallback(self, msg):
         
         self.groundTruth = msg
-        self.poseGraph()
+        # self.poseGraph()
 
 
     def poseGraph(self):
@@ -77,7 +76,7 @@ class PoseRepresent:
         plt.legend(loc = 'upper right')
         plt.draw()
         plt.pause(0.01)
-        self.timer += 1
+        # self.timer += 1
         # if self.timer % 20 == 0:
         #     plt.clf()
         # print("end of the graph")
