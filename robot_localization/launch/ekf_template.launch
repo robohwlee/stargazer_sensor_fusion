@@ -8,18 +8,21 @@
     -->
 
     <!-- specify topic names to fuse in ekf_template.yaml -->
-    <param name="imu_turtle" value = "/imu" />
-    <param name="odom_turtle" value = "/odom" />
-    <param name="odom_stargazer" value = "/marker_poses" />
-    
+    <!-- <param name="imu_turtle"      value = "/imu" />
+    <param name="odom_turtle"     value = "/odom" />
+    <param name="odom_stargazer"  value = "/robot_pose" /> -->
+
+    <!--TODO -->    
     <!-- calculated init pose topic -->
-    <!-- <param name="init_x" value = "/marker_poses/marker_pose[0]/position/x"/>
-    <param name="init_y" value = "/marker_poses/marker_pose[0]/position/y"/>
-    <param name="init_angle" value = "/marker_poses/marker_pose[0]/position/z"/> -->
-    
+    <!-- <param name="init_x" value = "/robot_pose/pose/position/x"/>
+    <param name="init_y" value = "/robot_pose/pose/position/y"/>
+    <param name="init_angle" value = "/robot_pose/pose/orientation/z"/> -->
+
+    <!-- <rosparam param="" -->
+        
     <!-- start the filter with the specified state -->
-    <!-- <rosparam param="initial_sate">[init_x,  init_y,  0.0,
-                                  0.0,  0.0,  init_angle,
+    <!-- <rosparam param="initial_state">[0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,
                                   0.0,  0.0,  0.0,
                                   0.0,  0.0,  0.0,
                                   0.0,  0.0,  0.0]</rosparam> -->

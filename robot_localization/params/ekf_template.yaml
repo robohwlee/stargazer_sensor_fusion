@@ -65,7 +65,7 @@ publish_acceleration: false
 map_frame: map              # Defaults to "map" if unspecified
 odom_frame: odom            # Defaults to "odom" if unspecified
 base_link_frame: base_footprint  # Defaults to "base_link" if unspecified
-world_frame: odom           # Defaults to the value of odom_frame if unspecified
+world_frame: map           # Defaults to the value of odom_frame if unspecified
 
 # The filter accepts an arbitrary number of inputs from each input message type (nav_msgs/Odometry,
 # geometry_msgs/PoseWithCovarianceStamped, geometry_msgs/TwistWithCovarianceStamped,
@@ -85,7 +85,7 @@ world_frame: odom           # Defaults to the value of odom_frame if unspecified
 
 # 일반 ODOM에서는 v, w 정보를 가져오자
 
-odom0: odom_turtle # ODOMETRY
+odom0: /odom # ODOMETRY
 odom0_config: [false, false, false, # x y z
                false, false, false, # roll pitch yaw
                true,  true,  false, # v_x v_y v_z
@@ -109,7 +109,7 @@ odom0_nodelay: false
 # data is converted to velocity data by differentiating the absolute pose measurements. These velocities are then
 # integrated as usual. NOTE: this only applies to sensors that provide pose measurements; setting differential to true
 # for twist measurements has no effect.
-#odom0_differential: false
+odom0_differential: false
 
 # [ADVANCED] When the node starts, if this parameter is true, then the first measurement is treated as a "zero point"
 # for all future measurements. While you can achieve the same effect with the differential paremeter, the key
@@ -127,7 +127,7 @@ odom0_pose_rejection_threshold: 5
 odom0_twist_rejection_threshold: 1
 
 # Further input parameter examples
-odom1: odom_stargazer # STARGAZER
+odom1: /robot_pose # STARGAZER
 odom1_config: [true, true, false,   # x y z
                false, false, true,  # roll pitch yaw
                false, false, false, # v_x v_y v_z
@@ -135,13 +135,13 @@ odom1_config: [true, true, false,   # x y z
                false, false, false] # a_x a_y a_z
 
 odom1_differential: false
-odom1_relative: true
+odom1_relative: True
 odom1_queue_size: 2
 odom1_pose_rejection_threshold: 2
 odom1_twist_rejection_threshold: 0.2
 odom1_nodelay: false
 
-imu0: imu_turtle # IMU
+imu0: /imu # IMU
 imu0_config: [false, false, false, # x y z
               false, false, false, # roll pitch yaw
               false, false, false, # v_x v_y v_z
@@ -149,7 +149,7 @@ imu0_config: [false, false, false, # x y z
                true,  true, false] # a_x a_y a_z
 imu0_nodelay: false
 imu0_differential: false
-imu0_relative: true
+imu0_relative: false
 imu0_queue_size: 5
 imu0_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
 imu0_twist_rejection_threshold: 0.8                #
