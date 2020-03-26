@@ -7,8 +7,11 @@ import matplotlib.pyplot as plt
 import matplotlib.pylab as plb
 import time
 import numpy as np
+import math
 from stargazer import StarGazer
+from tf.transformations import euler_from_quaternion
 from nav_msgs.msg import Odometry
+from sensor_msgs.msg import Imu
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 from stargazer.msg import (MarkerPose, MarkerPoses,
 						   MarkerRawPose, MarkerRawPoses)
@@ -36,7 +39,9 @@ class PoseRepresent:
 		rospy.Subscriber('marker_poses', PoseWithCovarianceStamped, self.markerCallback, queue_size=1)    # local pose
 		rospy.Subscriber('robot_pose', PoseWithCovarianceStamped, self.robotCallback, queue_size=1)    # global pose
 		rospy.Subscriber('vrpn_client_node/RigidBody/pose', PoseStamped, self.optitrackCallback, queue_size=1)    # global pose
-		rospy.Subscriber('odometry/filtered', Odometry, self.ekfCallback, queue_size=1) # filtered pose
+		rospy.Subscriber('odom', Odometry, self.odomCallback, queue_size=1)    # global pose
+		rospy.Subscriber('imu', Imu, self.imuCallback, queue_size=1)    # global pose
+		# rospy.Subscriber('odometry/filtered', Odometry, self.ekfCallback, queue_size=1) # filtered pose
 		
 
 	def spin(self):
@@ -52,26 +57,73 @@ class PoseRepresent:
 
 	def robotCallback(self, msg):
 		
-		self.x_robot = msg.pose.pose.position.x
-		self.y_robot = msg.pose.pose.position.y
 		self.robotpose = msg
+		self.x_robot = self.robotpose.pose.pose.position.x
+		self.y_robot = self.robotpose.pose.pose.position.y
+		rotation = (self.robotpose.pose.pose.orientation.x,
+					self.robotpose.pose.pose.orientation.y,
+					self.robotpose.pose.pose.orientation.z,
+					self.robotpose.pose.pose.orientation.w)
+		self.robot_yaw, self.robot_degree = self.getYawangle(rotation)
 		self.poseGraph()
 
 
 	def ekfCallback(self, msg):
 		
-		self.x_filtered = msg.pose.pose.position.y + self.ekf_x
-		self.y_filtered = msg.pose.pose.position.x + self.ekf_y
 		self.ekfpose = msg
+		self.x_filtered = self.ekfpose.pose.pose.position.x + self.ekf_x
+		self.y_filtered = self.ekfpose.pose.pose.position.y + self.ekf_y
 
 
 	def optitrackCallback(self, msg):
     		
-		self.x_truth = msg.pose.position.x + self.opti_x
-		self.y_truth = - msg.pose.position.y + self.opti_y
+		self.groundTruth = msg
+		self.x_truth = self.groundTruth.pose.position.x
+		# + self.opti_x
+		self.y_truth = - self.groundTruth.pose.position.y
+		#  + self.opti_y
+		rotation = (self.groundTruth.pose.orientation.x,
+					self.groundTruth.pose.orientation.y,
+					self.groundTruth.pose.orientation.z,
+					self.groundTruth.pose.orientation.w)
+		self.ground_yaw, self.ground_degree = self.getYawangle(rotation)
 		
-		# self.groundTruth = msg
 		# self.poseGraph()
+
+
+	def odomCallback(self, msg):
+    	
+		self.odom = msg
+		rotation = (self.odom.pose.pose.orientation.x,
+					self.odom.pose.pose.orientation.y,
+					self.odom.pose.pose.orientation.z,
+					self.odom.pose.pose.orientation.w)
+		self.odom_angle = self.getYawangle(rotation)
+		self.odom_yaw, self.odom_degree = self.getYawangle(rotation)
+
+
+	def imuCallback(self,msg):
+    		
+		self.imu = msg
+		rotation = (self.imu.orientation.x,
+					self.imu.orientation.y,
+					self.imu.orientation.z,
+					self.imu.orientation.w)
+		self.imu_angle = self.getYawangle(rotation)
+		self.imu_yaw, self.imu_degree = self.getYawangle(rotation)
+
+
+	def getYawangle(self, rotation):
+    	
+		euler_angle = euler_from_quaternion(rotation)
+		yaw = euler_angle[2]
+		if yaw < -math.pi:
+    			yaw += 2 * math.pi
+		if yaw > math.pi:
+    			yaw -= 2 * math.pi
+		degree = yaw * 180 / math.pi
+
+		return yaw, degree
 
 
 	def poseGraph(self):
@@ -81,12 +133,17 @@ class PoseRepresent:
 		
 		plt.ion()
 
-		print("Robot pose       = ",self.x_robot, self.y_robot)
-		print("filtered pose    = ",self.x_filtered, self.y_filtered)
-		print('Ground truth     = ',self.x_truth, self.y_truth)
+		# print('Robot pose       = ',self.x_robot, self.y_robot)
+		# print('Ground truth     = ',self.x_truth, self.y_truth)
+		print('Robot angle = ',self.robot_degree)
+		print('GroundTruth angle = ',self.ground_degree)
+		print('odom angle = ',self.odom_degree)
+		print('imu angular velocity = ', self.imu.angular_velocity.z)
+		# print('imu angle = ',self.imu_degree)
+		# print("filtered pose    = ",self.x_filtered, self.y_filtered)
 
 		plt.plot(self.x_robot, self.y_robot, 'b.',
-				self.x_filtered, self.y_filtered, 'r.--',
+				# self.x_filtered, self.y_filtered, 'r.--',
 				self.x_truth, self.y_truth, 'k.:')
 		# blue for robot / red for filtered / black for truth 
 		
@@ -94,7 +151,7 @@ class PoseRepresent:
 		# plt.plot(self.x_filtered, self.y_filtered, '.r', label = 'EKF')
 		# plt.plot(self.x_truth, self.y_truth, '.k', label = 'Ground truth')
 		
-		plt.axis([-0.5, 0.1, -2.0, 2.0]) # x axis from -2 to 2, y axis from 0 to 3
+		# plt.axis([-0.5, 0.1, -2.0, 2.0]) # x axis from -2 to 2, y axis from 0 to 3
 		
 		plt.grid(True)
 		plt.xlabel('x axis(m)')

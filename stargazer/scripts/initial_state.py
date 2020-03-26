@@ -10,7 +10,7 @@ from stargazer import StarGazer
 from geometry_msgs.msg import (Point, Quaternion, Pose, PoseArray,
                                Transform, TransformStamped,
                                PoseWithCovariance, PoseWithCovarianceStamped)
-from stargazer.msg import InitPose                               
+from stargazer.msg import InitPose
 from tf.transformations import euler_from_quaternion
 import numpy as np
 
