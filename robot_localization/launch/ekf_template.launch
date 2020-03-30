@@ -21,11 +21,11 @@
     <!-- <rosparam param="" -->
         
     <!-- start the filter with the specified state -->
-    <!-- <rosparam param="initial_state">[0.0,  0.0,  0.0,
+    <rosparam param="initial_state">[-0.12, -1.1,  0.0,
                                   0.0,  0.0,  0.0,
                                   0.0,  0.0,  0.0,
                                   0.0,  0.0,  0.0,
-                                  0.0,  0.0,  0.0]</rosparam> -->
+                                  0.0,  0.0,  0.0]</rosparam>
 
 
 
