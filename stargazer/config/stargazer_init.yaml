@@ -1,14 +1,17 @@
 MarkMode: Map # Alone, Map
 ThrVal: 210 # 210 to 240
 MarkHeight: 2500  # manually input
-IDNum: 7  # A total number of landmarks under Map Mode
-RefID: 8676 # Ref ID under map mode
+IDNum: 8  # A total number of landmarks under Map Mode
+RefID: 8660 # Ref ID under map mode
 ThrAlg: Auto
 MarkType: Office  # home for HLDn-S / office for HLDn-L
 MarkDim: 1  # 1 for HLDn-2, 2 for HLDn-3 / Q. What if we have only HLDn-1 ?
-MapMode: Stop
+MapMode: Start
 # If map building action under Map mode is required,
 # set 'Start' and start map building. or set 'Stop'
 
 # reference:
 # stargazer_publisher.py - get_options
+
+
+#cf. DarkRider rpm = 200
