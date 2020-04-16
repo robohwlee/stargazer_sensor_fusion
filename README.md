@@ -13,7 +13,7 @@ http://wiki.ros.org/ROS/Installation
 #### v-rep(optional)
 http://www.coppeliarobotics.com/downloads.html
 
-### Turtlebot3(burger used)
+### Turtlebot3(default: burger used)
 User should be able to handle the turtlebot according to the following manual<br/>
 http://emanual.robotis.com/docs/en/platform/turtlebot3/setup/#setup
 
