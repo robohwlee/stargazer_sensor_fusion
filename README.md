@@ -8,6 +8,7 @@ will be updated for other mobile robots
 ## Requirements
 
 ### ROS
+Ubuntu 16.04 & ros-kinetic are recommended for turtlebot <br/>
 http://wiki.ros.org/ROS/Installation
 
 #### v-rep(optional)
