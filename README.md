@@ -20,12 +20,12 @@ http://emanual.robotis.com/docs/en/platform/turtlebot3/setup/#setup
 #### for waffle
 Update OPENCR as follows
 http://emanual.robotis.com/docs/en/platform/turtlebot3/opencr_setup/#opencr-firmware-upload-for-tb3
-'''bash
+```bash
 export OPENCR_PORT=/dev/ttyACM0
 export OPENCR_MODEL=waffle
 rm -rf ./opencr_update.tar.bz2
 wget https://github.com/ROBOTIS-GIT/OpenCR-Binaries/raw/master/turtlebot3/ROS1/latest/opencr_update.tar.bz2 && tar -xvf opencr_update.tar.bz2 && cd ./opencr_update && ./update.sh $OPENCR_PORT $OPENCR_MODEL.opencr && cd ..
-'''
+```
 
 #### Network Configuration
 - Remote PC
