@@ -14,11 +14,11 @@ http://wiki.ros.org/ROS/Installation
 http://www.coppeliarobotics.com/downloads.html
 
 ### Turtlebot3(burger used)
-User should be able to handle the turtlebot according to the following manual
+User should be able to handle the turtlebot according to the following manual<br/>
 http://emanual.robotis.com/docs/en/platform/turtlebot3/setup/#setup
 
 #### for waffle
-Update OPENCR as follows
+Update OPENCR as follows<br/>
 http://emanual.robotis.com/docs/en/platform/turtlebot3/opencr_setup/#opencr-firmware-upload-for-tb3
 ```bash
 export OPENCR_PORT=/dev/ttyACM0
