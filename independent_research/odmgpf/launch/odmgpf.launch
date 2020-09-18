@@ -1,0 +1,13 @@
+<launch>
+
+  <arg name="d_threshold"/>
+  <arg name="gamma"/>
+  <arg name="k_holo"/>
+ 
+  <node name="trace" pkg="odmgpf" type="robot_graph.py" args="$(arg d_threshold) $(arg gamma) $(arg k_holo)" output="screen" />
+
+  <node name="odmgpf" pkg="odmgpf" type="odmgpf.py" args="$(arg d_threshold) $(arg gamma) $(arg k_holo)" output="screen">
+  </node>
+
+
+</launch>
