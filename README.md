@@ -93,6 +93,9 @@ roscore
 ```bash
 ssh ${RASPBERRY_PI_NAME}@${REMOTE_IP}
 ```
+<!-- ```
+#hw@165.132.46.98 for surver
+``` -->
 specify which model will be used
 ```bash
 export TURTLEBOT3_MODEL = burger

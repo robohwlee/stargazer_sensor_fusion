@@ -285,7 +285,6 @@ class StarGazerNode(object):
                 cartesian, quaternion, stamp, frame_id, self.stargazer_frame_id
             )
             # translation, rotation, time, child, parent 
-        if 
         self.tf_broadcaster.sendTransform(
                 cartesian, quaternion, stamp, frame_id, self.stargazer_frame_id
             )
