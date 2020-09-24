@@ -8,14 +8,25 @@ will be updated for other mobile robots
 ## Requirements
 
 ### ROS
+Ubuntu 16.04 & ros-kinetic are recommended for turtlebot <br/>
 http://wiki.ros.org/ROS/Installation
 
 #### v-rep(optional)
 http://www.coppeliarobotics.com/downloads.html
 
-### Turtlebot3(burger used)
-User should be able to handle the turtlebot according to the following manual
+### Turtlebot3(default: burger used)
+User should be able to handle the turtlebot according to the following manual<br/>
 http://emanual.robotis.com/docs/en/platform/turtlebot3/setup/#setup
+
+#### for waffle
+Update OPENCR as follows<br/>
+http://emanual.robotis.com/docs/en/platform/turtlebot3/opencr_setup/#opencr-firmware-upload-for-tb3
+```bash
+export OPENCR_PORT=/dev/ttyACM0
+export OPENCR_MODEL=waffle
+rm -rf ./opencr_update.tar.bz2
+wget https://github.com/ROBOTIS-GIT/OpenCR-Binaries/raw/master/turtlebot3/ROS1/latest/opencr_update.tar.bz2 && tar -xvf opencr_update.tar.bz2 && cd ./opencr_update && ./update.sh $OPENCR_PORT $OPENCR_MODEL.opencr && cd ..
+```
 
 #### Network Configuration
 - Remote PC
@@ -83,6 +94,9 @@ roscore
 ```bash
 ssh ${RASPBERRY_PI_NAME}@${REMOTE_IP}
 ```
+<!-- ```
+#hw@165.132.46.98 for surver
+``` -->
 specify which model will be used
 ```bash
 export TURTLEBOT3_MODEL = burger

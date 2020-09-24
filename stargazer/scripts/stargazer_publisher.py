@@ -284,7 +284,10 @@ class StarGazerNode(object):
             self.tf_broadcaster.sendTransform(
                 cartesian, quaternion, stamp, frame_id, self.stargazer_frame_id
             )
-
+            # translation, rotation, time, child, parent 
+        self.tf_broadcaster.sendTransform(
+                cartesian, quaternion, stamp, frame_id, self.stargazer_frame_id
+            )
         # specify covariance as it is required 
         # marker_poses_msg.pose.covariance = 
 
