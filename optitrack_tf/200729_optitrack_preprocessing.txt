@@ -1,0 +1,24 @@
+Align Position
+
+1. Get distance from the stargazer and Optitrack
+
+2. Cal. mean value of the distances
+
+3. 2 = distance parameter
+
+
+
+Location of Landmark
+
+1. Position criteria = Aligned optitrack
+
+2. Change criteria = stargazer's frame_id (at the transition moment)
+
+
+
+
+Distance from each landmark
+
+1. Landmark criteria = Aligned optitrack
+
+2. 

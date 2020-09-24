@@ -184,7 +184,7 @@ imu0_remove_gravitational_acceleration: true
 # problematic, as the final velocity will effectively be a weighted average of the old velocity and the new one. When
 # this velocity is the integrated into a new pose, the result can be sluggish covergence. This effect is especially
 # noticeable with LIDAR data during rotations. To get around it, users can try inflating the process_noise_covariance
-# for the velocity variable in question, or decrease the  variance of the variable in question in the measurement
+# for the velocity variable in question, or decrease the variance of the variable in question in the measurement
 # itself. In addition, users can also take advantage of the control command being issued to the robot at the time we
 # make the prediction. If control is used, it will get converted into an acceleration term, which will be used during
 # predicition. Note that if an acceleration measurement for the variable in question is available from one of the

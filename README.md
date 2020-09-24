@@ -1,4 +1,4 @@
-# vrep_holonomic
+# stargazer sensor-fusion for EKF
 
 ROS stargazer EKF(extended kalman filter) simulation package for turtle bot 3(burger)
 will be updated for other mobile robots

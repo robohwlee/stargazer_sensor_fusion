@@ -9,6 +9,7 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
 import copy
 import numpy as np
+import sys
 
 
 class TfForExperiment:
@@ -18,9 +19,17 @@ class TfForExperiment:
         # Initialize ros node
         rospy.init_node('tf_broadcaster', anonymous=True)
 
-        # parameter for transportation
-        self.opti_x_v3 = + 0.16
-        self.opti_y_v3 = - 0.09
+        # Aligne coordinate of ground truth according to rosbag file
+        numOfbagfile = 5 # 1, 3, 5 for v1, v3, v5 each
+        self.opti_x, self.opti_y = self.align_optitrack(numOfbagfile)
+
+        # Get the distance
+        self.optitrack_d = None
+        self.stargazer_d = None
+        self.diff = []
+        self.diff_x = []
+        self.diff_y = []
+        
 
         # Subscriber
         rospy.Subscriber('/vrpn_client_node/RigidBody/pose', PoseStamped, self.handle_optitrack_pose, queue_size=1)
@@ -32,18 +41,54 @@ class TfForExperiment:
         self.odom_pub = rospy.Publisher('odom_aligned',Odometry, queue_size=1)
         # self.robot_pose_pub = rospy.Publisher('robot_pose_aligned', PoseWithCovarianceStamped, queue_size=1)
         self.optitrack_pub = rospy.Publisher('/vrpn_client_node/RigidBody/pose_aligned', PoseStamped, queue_size=1)
-     
+
         self.transform_buffer = geometry_msgs.msg.TransformStamped()
 
 
     def spin(self):
         rospy.spin()
 
+    
+    def calculate_distance(self):
+
+        diff_x = self.optitrack_d.pose.position.x - self.stargazer_d.pose.pose.position.x
+        diff_y = self.optitrack_d.pose.position.y - self.stargazer_d.pose.pose.position.y
+        # print("x = ",diff_x)
+        # print("y = ", diff_y)
+        diff = math.sqrt(diff_x**2 + diff_y**2)
+
+        # print("diff =",diff)
+        self.diff.append(diff)
+        self.diff_x.append(diff_x)
+        self.diff_y.append(diff_y)
+        if len(self.diff_x) > 1000:
+            x = np.mean(np.array(self.diff_x))
+            y = np.mean(np.array(self.diff_y))
+            print("x and y = ",x,y)
+
+        
+    def align_optitrack(self, numOfdata):
+
+        if numOfdata == 1:
+            x = - 0.07
+            y = 0.1
+        elif numOfdata == 3:
+            x = + 0.16
+            y = - 0.09
+        elif numOfdata == 5:
+            x = - 0.54
+            y = - 0.09
+        else:
+            sys.stdout.write("You passed wrong bag file. Please check the number again")
+
+        return x, y
+
 
     def handle_optitrack_pose(self, msg):
         '''
         transform from optitrack frame to robot(base_link)
         '''
+        self.optitrack_d = msg
         t = geometry_msgs.msg.TransformStamped()
         t.header.stamp = msg.header.stamp
         t.header.frame_id = "world"
@@ -51,7 +96,7 @@ class TfForExperiment:
         t.transform.translation.x = 0.0
         t.transform.translation.y = 0.0
         t.transform.translation.z = 0.0
-        theta = self.theta_from_degree(180)
+        theta = self.rad_from_degree(180)
         q = tf_conversions.transformations.quaternion_from_euler(0, 0, theta)
         t.transform.rotation.x = q[0]
         t.transform.rotation.y = q[1]
@@ -67,9 +112,10 @@ class TfForExperiment:
         align opti track orientation value to synchronize with stargazer frame
         '''
         optitrack_msg = copy.deepcopy(msg)
+        self.optitrack_d = msg
 
-        optitrack_msg.pose.position.x = msg.pose.position.x + self.opti_x_v3
-        optitrack_msg.pose.position.y = - msg.pose.position.y + self.opti_y_v3
+        optitrack_msg.pose.position.x = msg.pose.position.x + self.opti_x
+        optitrack_msg.pose.position.y = - msg.pose.position.y + self.opti_y
 
         quaternion = np.array([optitrack_msg.pose.orientation.x,
                     optitrack_msg.pose.orientation.y,
@@ -97,7 +143,7 @@ class TfForExperiment:
         t.transform.translation.x = 0.00
         t.transform.translation.y = 5.0
         t.transform.translation.z = 0.0
-        theta = self.theta_from_degree(-90)
+        theta = self.rad_from_degree(-90)
         q = tf_conversions.transformations.quaternion_from_euler(0, 0, theta)
         t.transform.rotation.x = q[0]
         t.transform.rotation.y = q[1]
@@ -125,6 +171,9 @@ class TfForExperiment:
         '''
         synchronize stargazer's frame of global(map) and local center(stragazer)
         '''
+        self.stargazer_d = msg
+        self.calculate_distance()
+
         t = geometry_msgs.msg.TransformStamped()
         t.header.stamp = msg.header.stamp
         t.header.frame_id = "stargazer"
@@ -132,7 +181,7 @@ class TfForExperiment:
         t.transform.translation.x = 0
         t.transform.translation.y = 0
         t.transform.translation.z = 0.00
-        theta = self.theta_from_degree(0)
+        theta = self.rad_from_degree(0)
         q = tf_conversions.transformations.quaternion_from_euler(0, 0, theta)
         t.transform.rotation.x = q[0]
         t.transform.rotation.y = q[1]
@@ -142,7 +191,7 @@ class TfForExperiment:
         self.br.sendTransform(t)
 
 
-    def theta_from_degree(self, degree):
+    def rad_from_degree(self, degree):
 
         return degree * math.pi / 180
 
