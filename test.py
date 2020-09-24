@@ -38,12 +38,11 @@ class PoseRepresent:
 		# self.opti_y	= - 0.06
 
 		# Subscriber
-		rospy.Subscriber('marker_poses', PoseWithCovarianceStamped, self.robotCallback, queue_size=1)    # local pose
-		# rospy.Subscriber('robot_pose', PoseWithCovarianceStamped, self.robotCallback, queue_size=1)    # global pose
-		# rospy.Subscriber('vrpn_client_node/RigidBody/posef_aligned', PoseStamped, self.optitrackCallback, queue_size=1)    # global pose
-		rospy.Subscriber('vrpn_client_node/turtlebot/pose', PoseStamped, self.optitrackCallback, queue_size=1)    # global pose
-		# rospy.Subscriber('odom', Odometry, self.odomCallback, queue_size=1)    # global pose
-		# rospy.Subscriber('imu', Imu, self.imuCallback, queue_size=1)    # global pose
+		rospy.Subscriber('marker_poses', PoseWithCovarianceStamped, self.markerCallback, queue_size=1)    # local pose
+		rospy.Subscriber('robot_pose', PoseWithCovarianceStamped, self.robotCallback, queue_size=1)    # global pose
+		rospy.Subscriber('vrpn_client_node/RigidBody/pose_aligned', PoseStamped, self.optitrackCallback, queue_size=1)    # global pose
+		rospy.Subscriber('odom', Odometry, self.odomCallback, queue_size=1)    # global pose
+		rospy.Subscriber('imu', Imu, self.imuCallback, queue_size=1)    # global pose
 		# rospy.Subscriber('odometry/filtered', Odometry, self.ekfCallback, queue_size=1) # filtered pose
 		
 
@@ -55,7 +54,6 @@ class PoseRepresent:
 		
 		self.markerpose = msg
 		self.marker_id_buffer = self.markerpose.header.frame_id
-		self.poseGraph()
 		# if self.marker_id_buffer == 
 
 
@@ -65,6 +63,7 @@ class PoseRepresent:
 		self.x_robot = self.robotpose.pose.pose.position.x
 		self.y_robot = self.robotpose.pose.pose.position.y
 
+        
 		rotation = (self.robotpose.pose.pose.orientation.x,
 					self.robotpose.pose.pose.orientation.y,
 					self.robotpose.pose.pose.orientation.z,
@@ -83,8 +82,8 @@ class PoseRepresent:
 	def optitrackCallback(self, msg):
     	
 		self.groundTruth = copy.deepcopy(msg)
-		self.x_truth = - self.groundTruth.pose.position.y - 0.824
-		self.y_truth = self.groundTruth.pose.position.x + 0.024
+		self.x_truth = self.groundTruth.pose.position.x
+		self.y_truth = self.groundTruth.pose.position.y
 
 		rotation = (self.groundTruth.pose.orientation.x,
 					self.groundTruth.pose.orientation.y,
@@ -139,7 +138,7 @@ class PoseRepresent:
 				# self.x_filtered, self.y_filtered, 'r.--',
 				self.x_truth, self.y_truth, 'k.:')
 		# blue for robot / red for filtered / black for truth 
-		plt.axis([-4.0, 1.5, 0, 0.5]) # x axis from -0.5 to 0.1, y axis from -2.0 to 2.0
+		# plt.axis([-0.05, 0.16, -1.15, 2.0]) # x axis from -0.5 to 0.1, y axis from -2.0 to 2.0
 		plt.xlabel('x axis(m)')
 		plt.ylabel('y axis(m)')
 		plt.title('Straight line w constant velocity')
@@ -148,23 +147,31 @@ class PoseRepresent:
 		'''
 		# self.count += 1
 		# print(self.count)
-		# diff_x = self.x_filtered - self.x_truth
-		# plt.plot(self.count, self.x_filtered, 'r.',
-		# 			self.count, self.x_truth, 'k.',
-		# 			self.count, self.x_robot, 'g.',
-		# 			self.count, diff_x, 'b.')
+		# diff_x = self.x_robot - self.x_truth
+		# # plt.plot(
+		# # 			# self.count, self.x_filtered, 'r.',
+		# # 			self.count, self.x_truth, 'k.',
+		# # 			self.count, self.x_robot, 'g.',
+		# # 			self.count, diff_x, 'b.')
+		
+		# plt.plot(
+		# 			# self.count, self.x_filtered, 'r.',
+		# 			self.y_truth, self.x_truth, 'k.',
+		# 			self.y_robot, self.x_robot, 'g.',
+		# 			self.y_truth, diff_x, 'b.')
+
 		# plt.axis([0, 150, -0.05, 0.16])
 		'''
 		y error
 		'''
 		# diff_y = self.y_filtered - self.y_truth
-		# plt.plot(self.count, self.y_filtered, 'r.',
+		# plt.plot(
+		# 			self.count, self.y_filtered, 'r.',
 		# 			self.count, self.y_truth, 'k.',
 		# 			self.count, self.y_robot, 'g.',
 		# 			self.count, diff_y, 'b.')
 		# plt.plot(self.count, diff_y, 'b.')
 		# plt.axis([0, 150, -1.15, 0.1]) # 150 count for y axis from -1.2 to 2
-		
 		# plt.xlabel('count')
 		# plt.ylabel('x axis(m)')
 		# plt.title('Straight line w constant velocity')
