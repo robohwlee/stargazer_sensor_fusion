@@ -38,20 +38,12 @@ class PoseRepresent:
 		# self.opti_y	= - 0.06
 
 		# Subscriber
-<<<<<<< HEAD
-		rospy.Subscriber('marker_poses', PoseWithCovarianceStamped, self.markerCallback, queue_size=1)    # local pose
-		rospy.Subscriber('robot_pose', PoseWithCovarianceStamped, self.robotCallback, queue_size=1)    # global pose
-		rospy.Subscriber('vrpn_client_node/RigidBody/pose_aligned', PoseStamped, self.optitrackCallback, queue_size=1)    # global pose
-		rospy.Subscriber('odom', Odometry, self.odomCallback, queue_size=1)    # global pose
-		rospy.Subscriber('imu', Imu, self.imuCallback, queue_size=1)    # global pose
-=======
 		rospy.Subscriber('marker_poses', PoseWithCovarianceStamped, self.robotCallback, queue_size=1)    # local pose
 		# rospy.Subscriber('robot_pose', PoseWithCovarianceStamped, self.robotCallback, queue_size=1)    # global pose
 		# rospy.Subscriber('vrpn_client_node/RigidBody/posef_aligned', PoseStamped, self.optitrackCallback, queue_size=1)    # global pose
 		rospy.Subscriber('vrpn_client_node/turtlebot/pose', PoseStamped, self.optitrackCallback, queue_size=1)    # global pose
 		# rospy.Subscriber('odom', Odometry, self.odomCallback, queue_size=1)    # global pose
 		# rospy.Subscriber('imu', Imu, self.imuCallback, queue_size=1)    # global pose
->>>>>>> f22482da83b0a629ba51ae85ba7a31b28192da1a
 		# rospy.Subscriber('odometry/filtered', Odometry, self.ekfCallback, queue_size=1) # filtered pose
 		
 
@@ -148,11 +140,7 @@ class PoseRepresent:
 				# self.x_filtered, self.y_filtered, 'r.--',
 				self.x_truth, self.y_truth, 'k.:')
 		# blue for robot / red for filtered / black for truth 
-<<<<<<< HEAD
-		# plt.axis([-0.05, 0.16, -1.15, 2.0]) # x axis from -0.5 to 0.1, y axis from -2.0 to 2.0
-=======
 		plt.axis([-4.0, 1.5, 0, 0.5]) # x axis from -0.5 to 0.1, y axis from -2.0 to 2.0
->>>>>>> f22482da83b0a629ba51ae85ba7a31b28192da1a
 		plt.xlabel('x axis(m)')
 		plt.ylabel('y axis(m)')
 		plt.title('Straight line w constant velocity')
@@ -161,27 +149,11 @@ class PoseRepresent:
 		'''
 		# self.count += 1
 		# print(self.count)
-<<<<<<< HEAD
-		# diff_x = self.x_robot - self.x_truth
-		# # plt.plot(
-		# # 			# self.count, self.x_filtered, 'r.',
-		# # 			self.count, self.x_truth, 'k.',
-		# # 			self.count, self.x_robot, 'g.',
-		# # 			self.count, diff_x, 'b.')
-		
-		# plt.plot(
-		# 			# self.count, self.x_filtered, 'r.',
-		# 			self.y_truth, self.x_truth, 'k.',
-		# 			self.y_robot, self.x_robot, 'g.',
-		# 			self.y_truth, diff_x, 'b.')
-
-=======
 		# diff_x = self.x_filtered - self.x_truth
 		# plt.plot(self.count, self.x_filtered, 'r.',
 		# 			self.count, self.x_truth, 'k.',
 		# 			self.count, self.x_robot, 'g.',
 		# 			self.count, diff_x, 'b.')
->>>>>>> f22482da83b0a629ba51ae85ba7a31b28192da1a
 		# plt.axis([0, 150, -0.05, 0.16])
 		'''
 		y error
@@ -194,10 +166,7 @@ class PoseRepresent:
 		# 			self.count, diff_y, 'b.')
 		# plt.plot(self.count, diff_y, 'b.')
 		# plt.axis([0, 150, -1.15, 0.1]) # 150 count for y axis from -1.2 to 2
-<<<<<<< HEAD
-=======
 		
->>>>>>> f22482da83b0a629ba51ae85ba7a31b28192da1a
 		# plt.xlabel('count')
 		# plt.ylabel('x axis(m)')
 		# plt.title('Straight line w constant velocity')
